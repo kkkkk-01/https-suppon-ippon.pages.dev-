@@ -10,11 +10,14 @@ async function updateStatus() {
     const response = await axios.get('/api/status');
     const data = response.data;
     
+    console.log('updateStatus呼び出し - sessionId:', data.sessionId, 'currentSessionId:', currentSessionId, 'votes:', data.votes[judgeNumber]);
+    
     // セッションIDが変わった場合（リセットされた場合）、投票フラグをクリア
     if (currentSessionId !== null && data.sessionId !== currentSessionId) {
       console.log('セッションがリセットされました:', currentSessionId, '->', data.sessionId);
       hasVoted = false;
       currentVoteCount = 0;
+      isProcessing = false;  // 処理中フラグもクリア
     }
     
     // セッションIDを更新
@@ -24,13 +27,14 @@ async function updateStatus() {
     currentVoteCount = data.votes[judgeNumber] || 0;
     document.getElementById('currentVoteCount').textContent = currentVoteCount;
     
-    // 投票数に基づいて投票済みフラグを更新
-    if (currentVoteCount > 0) {
-      hasVoted = true;
-    } else if (currentVoteCount === 0 && !isProcessing) {
-      // 投票数が0で処理中でない場合のみ、投票可能に戻す
+    // 投票数が0なら投票可能、0より大きければ投票済み
+    if (currentVoteCount === 0) {
       hasVoted = false;
+    } else {
+      hasVoted = true;
     }
+    
+    console.log('updateStatus完了 - hasVoted:', hasVoted, 'currentVoteCount:', currentVoteCount, 'isProcessing:', isProcessing);
     
     // ボタンの有効/無効を更新
     updateButtonStates();
