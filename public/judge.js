@@ -45,8 +45,11 @@ function updateButtonStates() {
   const vote2Btn = document.getElementById('vote2Btn');
   const vote3Btn = document.getElementById('vote3Btn');
   
+  console.log('updateButtonStates:', 'hasVoted:', hasVoted, 'isProcessing:', isProcessing, 'currentVoteCount:', currentVoteCount);
+  
   // 既に投票済み、または処理中の場合はすべてのボタンを無効化
   if (hasVoted || isProcessing) {
+    console.log('ボタンを無効化');
     vote1Btn.disabled = true;
     vote1Btn.classList.add('opacity-50', 'cursor-not-allowed');
     vote2Btn.disabled = true;
@@ -57,6 +60,7 @@ function updateButtonStates() {
   }
   
   // 未投票の場合、すべてのボタンを有効化
+  console.log('ボタンを有効化');
   vote1Btn.disabled = false;
   vote1Btn.classList.remove('opacity-50', 'cursor-not-allowed');
   vote2Btn.disabled = false;
@@ -67,16 +71,22 @@ function updateButtonStates() {
 
 // 投票処理（一括投票）
 async function voteMultiple(count) {
+  console.log('voteMultiple呼び出し:', count, 'hasVoted:', hasVoted, 'isProcessing:', isProcessing);
+  
   // 既に投票済みの場合は何もしない
   if (hasVoted) {
+    console.log('投票済みのため処理をスキップ');
     showFeedback('既に投票済みです', 'error');
     return;
   }
   
   // 処理中の場合は何もしない（連続タップ防止）
   if (isProcessing) {
+    console.log('処理中のため処理をスキップ');
     return;
   }
+  
+  console.log('投票処理を開始します');
   
   try {
     // 処理中フラグを立てる
