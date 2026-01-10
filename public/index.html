@@ -20,149 +20,9 @@
             background-color: rgba(239, 68, 68, 0.95);
             border-color: #dc2626 !important;
           }
-
-          /* ゴールデンアニメーション背景 */
-          .golden-animation-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.3);
-            pointer-events: none;
-            z-index: 9999;
-            display: none;
-            overflow: hidden;
-          }
-          
-          .golden-animation-overlay.active {
-            display: block;
-          }
-
-          /* 六角形フレーム - 外側から中央に滑らかに収束 */
-          @keyframes hexagonSmoothConverge {
-            0% { 
-              transform: translate(-50%, -50%) scale(2.5); 
-              opacity: 0; 
-            }
-            10% { 
-              opacity: 1; 
-            }
-            90% {
-              opacity: 1;
-            }
-            100% { 
-              transform: translate(-50%, -50%) scale(0.3); 
-              opacity: 0; 
-            }
-          }
-
-          .hexagon-frame {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 600px;
-            height: 340px;
-            border: 4px solid #ffd700;
-            clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
-            animation: hexagonSmoothConverge 3s linear infinite;
-          }
-
-          .hexagon-frame:nth-child(1) { animation-delay: 0s; }
-          .hexagon-frame:nth-child(2) { animation-delay: 0.2s; }
-          .hexagon-frame:nth-child(3) { animation-delay: 0.4s; }
-          .hexagon-frame:nth-child(4) { animation-delay: 0.6s; }
-          .hexagon-frame:nth-child(5) { animation-delay: 0.8s; }
-          .hexagon-frame:nth-child(6) { animation-delay: 1.0s; }
-          .hexagon-frame:nth-child(7) { animation-delay: 1.2s; }
-          .hexagon-frame:nth-child(8) { animation-delay: 1.4s; }
-          .hexagon-frame:nth-child(9) { animation-delay: 1.6s; }
-          .hexagon-frame:nth-child(10) { animation-delay: 1.8s; }
-
-          /* 放射状の光線 - シンプルで滑らか */
-          @keyframes raySmoothPulse {
-            0%, 100% { 
-              opacity: 0.3;
-              transform: scaleX(1);
-            }
-            50% { 
-              opacity: 0.8;
-              transform: scaleX(1.2);
-            }
-          }
-
-          .light-ray {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 50vw;
-            height: 2px;
-            background: linear-gradient(90deg, rgba(255, 215, 0, 0), rgba(255, 215, 0, 1), rgba(255, 215, 0, 0));
-            transform-origin: center;
-            animation: raySmoothPulse 2s ease-in-out infinite;
-          }
-
-          .light-ray:nth-child(11) { transform: rotate(0deg); }
-          .light-ray:nth-child(12) { transform: rotate(30deg); }
-          .light-ray:nth-child(13) { transform: rotate(60deg); }
-          .light-ray:nth-child(14) { transform: rotate(90deg); }
-          .light-ray:nth-child(15) { transform: rotate(120deg); }
-          .light-ray:nth-child(16) { transform: rotate(150deg); }
-          .light-ray:nth-child(17) { transform: rotate(180deg); }
-          .light-ray:nth-child(18) { transform: rotate(210deg); }
-          .light-ray:nth-child(19) { transform: rotate(240deg); }
-          .light-ray:nth-child(20) { transform: rotate(270deg); }
-          .light-ray:nth-child(21) { transform: rotate(300deg); }
-          .light-ray:nth-child(22) { transform: rotate(330deg); }
-
-          /* パーティクル（星） - シンプルな点滅 */
-          @keyframes particleTwinkle {
-            0%, 100% { opacity: 0; transform: scale(0); }
-            50% { opacity: 1; transform: scale(1); }
-          }
-
-          .particle {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: #ffd700;
-            border-radius: 50%;
-            box-shadow: 0 0 5px #ffd700;
-            animation: particleTwinkle 2s ease-in-out infinite;
-          }
         </style>
     </head>
     <body class="min-h-screen" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);">
-        <!-- ゴールデンアニメーションオーバーレイ -->
-        <div id="goldenAnimation" class="golden-animation-overlay">
-            <!-- 六角形フレーム（10層でスムーズに） -->
-            <div class="hexagon-frame"></div>
-            <div class="hexagon-frame"></div>
-            <div class="hexagon-frame"></div>
-            <div class="hexagon-frame"></div>
-            <div class="hexagon-frame"></div>
-            <div class="hexagon-frame"></div>
-            <div class="hexagon-frame"></div>
-            <div class="hexagon-frame"></div>
-            <div class="hexagon-frame"></div>
-            <div class="hexagon-frame"></div>
-            
-            <!-- 放射状の光線（12本） -->
-            <div class="light-ray"></div>
-            <div class="light-ray"></div>
-            <div class="light-ray"></div>
-            <div class="light-ray"></div>
-            <div class="light-ray"></div>
-            <div class="light-ray"></div>
-            <div class="light-ray"></div>
-            <div class="light-ray"></div>
-            <div class="light-ray"></div>
-            <div class="light-ray"></div>
-            <div class="light-ray"></div>
-            <div class="light-ray"></div>
-        </div>
-
         <div class="container mx-auto p-4 md:p-6">
             <!-- ヘッダー -->
             <div class="text-center mb-4">
@@ -236,7 +96,7 @@
         <audio id="yoAudio" src="/yo-sound.m4a" preload="auto"></audio>
         <audio id="voteAudio" src="/vote-sound.mp3" preload="auto"></audio>
         
-        <script src="/pc.js?v=11"></script>
+        <script src="/pc.js?v=12"></script>
     </body>
     </html>
   

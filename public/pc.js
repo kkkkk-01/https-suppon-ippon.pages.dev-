@@ -9,9 +9,6 @@ const ipponAudio = document.getElementById('ipponAudio');
 const yoAudio = document.getElementById('yoAudio');
 const voteAudio = document.getElementById('voteAudio');
 
-// アニメーション要素
-const goldenAnimation = document.getElementById('goldenAnimation');
-
 // 状態を更新
 async function updateStatus() {
   try {
@@ -81,23 +78,9 @@ async function updateStatus() {
       ipponBanner.classList.remove('hidden');
       hasPlayedIppon = true;
       
-      // ゴールデンアニメーションを表示
-      goldenAnimation.classList.add('active');
-      
-      // パーティクルを生成
-      createParticles();
-      
-      // 音声再生
+      // 音声再生のみ（アニメーションなし）
       ipponAudio.currentTime = 0;
       ipponAudio.play().catch(e => console.log('音声再生エラー:', e));
-      
-      // 5秒後にアニメーションを非表示
-      setTimeout(() => {
-        goldenAnimation.classList.remove('active');
-        // パーティクルをクリア
-        const particles = goldenAnimation.querySelectorAll('.particle');
-        particles.forEach(p => p.remove());
-      }, 5000);
     } else if (data.isIppon) {
       // IPPON状態が続く場合はバナーのみ表示（音声なし）
       ipponBanner.classList.remove('hidden');
@@ -124,20 +107,6 @@ async function checkYoEvent() {
     }
   } catch (error) {
     console.error('YO〜イベント取得エラー:', error);
-  }
-}
-
-// パーティクル生成関数（スムーズな配置）
-function createParticles() {
-  const particleCount = 30;
-  for (let i = 0; i < particleCount; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-    particle.style.left = Math.random() * 100 + '%';
-    particle.style.top = Math.random() * 100 + '%';
-    particle.style.animationDelay = Math.random() * 3 + 's';
-    particle.style.animationDuration = (2 + Math.random() * 1) + 's';
-    goldenAnimation.appendChild(particle);
   }
 }
 
