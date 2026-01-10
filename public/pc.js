@@ -14,15 +14,28 @@ async function updateStatus() {
     const response = await axios.get('/api/status');
     const data = response.data;
     
+    console.log('PC画面 - ステータス更新:', {
+      sessionId: data.sessionId,
+      voteCount: data.voteCount,
+      votes: data.votes
+    });
+    
     // セッションが変わったらIPPON再生フラグと前回の投票状態をリセット
     if (currentSessionId !== data.sessionId) {
+      console.log('セッション変更:', currentSessionId, '->', data.sessionId);
       currentSessionId = data.sessionId;
       hasPlayedIppon = false;
       previousVotes = {}; // 前回の投票状態をクリア
     }
     
     // 投票カウントを更新
-    document.getElementById('voteCount').textContent = data.voteCount;
+    const voteCountElement = document.getElementById('voteCount');
+    if (voteCountElement) {
+      voteCountElement.textContent = data.voteCount;
+      console.log('投票数を更新:', data.voteCount);
+    } else {
+      console.error('voteCount 要素が見つかりません');
+    }
     
     // 各審査員の状態を更新
     for (let i = 1; i <= 5; i++) {
