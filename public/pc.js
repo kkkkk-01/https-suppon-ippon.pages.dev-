@@ -3,7 +3,6 @@ let currentSessionId = null;
 let hasPlayedIppon = false;
 let lastPlayedYoId = null;
 let previousTotalVotes = 0;
-let isResetting = false; // リセット中フラグ
 
 // 音声要素
 const ipponAudio = document.getElementById('ipponAudio');
@@ -21,7 +20,6 @@ async function updateStatus() {
       currentSessionId = data.sessionId;
       hasPlayedIppon = false;
       previousTotalVotes = data.voteCount; // 現在の投票数を初期値に設定
-      isResetting = false; // リセット完了
     }
     
     // 投票数が増えた場合、投票音を再生
@@ -75,8 +73,7 @@ async function updateStatus() {
     // IPPONバナー表示
     const ipponBanner = document.getElementById('ipponBanner');
     
-    // リセット中は音声再生をスキップ
-    if (data.isIppon && !hasPlayedIppon && !isResetting) {
+    if (data.isIppon && !hasPlayedIppon) {
       // IPPON達成時のみ表示と音声再生
       ipponBanner.classList.remove('hidden');
       hasPlayedIppon = true;
@@ -116,14 +113,32 @@ async function checkYoEvent() {
 // リセットボタン
 document.getElementById('resetBtn').addEventListener('click', async () => {
   try {
-    isResetting = true; // リセット開始（音声再生を防ぐ）
     await axios.post('/api/reset');
-    // hasPlayedIpponはリセットしない（セッションIDの変更で自動的にリセットされる）
+    // リセット直後は必ず音声を再生しない
+    // セッションIDが変更されるまで待つ
+    const oldSessionId = currentSessionId;
+    hasPlayedIppon = true; // 一時的にtrueにして音声再生を防ぐ
+    
+    // 新しいセッションIDが返ってくるまで待機（最大3秒）
+    for (let i = 0; i < 30; i++) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const response = await axios.get('/api/status');
+      if (response.data.sessionId !== oldSessionId) {
+        // 新しいセッションを検知したら正常にリセット
+        currentSessionId = response.data.sessionId;
+        hasPlayedIppon = false;
+        previousTotalVotes = 0;
+        await updateStatus();
+        return;
+      }
+    }
+    
+    // タイムアウト（念のため）
+    hasPlayedIppon = false;
     await updateStatus();
   } catch (error) {
     console.error('リセットエラー:', error);
     alert('リセットに失敗しました');
-    isResetting = false; // エラー時もフラグをリセット
   }
 });
 
