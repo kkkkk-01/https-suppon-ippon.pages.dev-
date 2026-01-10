@@ -19,11 +19,11 @@ async function updateStatus() {
     if (currentSessionId !== data.sessionId) {
       currentSessionId = data.sessionId;
       hasPlayedIppon = false;
-      previousTotalVotes = 0;
+      previousTotalVotes = data.voteCount; // 現在の投票数を初期値に設定
     }
     
     // 投票数が増えた場合、投票音を再生
-    if (data.voteCount > previousTotalVotes && previousTotalVotes > 0) {
+    if (data.voteCount > previousTotalVotes) {
       voteAudio.currentTime = 0;
       voteAudio.play().catch(e => console.log('投票音再生エラー:', e));
     }
@@ -110,7 +110,6 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
   try {
     await axios.post('/api/reset');
     hasPlayedIppon = false;
-    previousTotalVotes = 0;
     await updateStatus();
   } catch (error) {
     console.error('リセットエラー:', error);
