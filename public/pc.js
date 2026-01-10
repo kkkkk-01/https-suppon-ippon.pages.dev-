@@ -1,8 +1,7 @@
 // PC集計画面のJavaScript
 let currentSessionId = null;
 let hasPlayedIppon = false;
-let lastPlayedYoId = null; // 最後に再生したYO〜イベントのID
-let previousVotes = {}; // 前回の投票状態を記録
+let lastPlayedYoId = null;
 
 // 音声要素
 const ipponAudio = document.getElementById('ipponAudio');
@@ -14,27 +13,16 @@ async function updateStatus() {
     const response = await axios.get('/api/status');
     const data = response.data;
     
-    console.log('PC画面 - ステータス更新:', {
-      sessionId: data.sessionId,
-      voteCount: data.voteCount,
-      votes: data.votes
-    });
-    
-    // セッションが変わったらIPPON再生フラグと前回の投票状態をリセット
+    // セッションが変わったらIPPON再生フラグをリセット
     if (currentSessionId !== data.sessionId) {
-      console.log('セッション変更:', currentSessionId, '->', data.sessionId);
       currentSessionId = data.sessionId;
       hasPlayedIppon = false;
-      previousVotes = {}; // 前回の投票状態をクリア
     }
     
     // 投票カウントを更新
     const voteCountElement = document.getElementById('voteCount');
     if (voteCountElement) {
       voteCountElement.textContent = data.voteCount;
-      console.log('投票数を更新:', data.voteCount);
-    } else {
-      console.error('voteCount 要素が見つかりません');
     }
     
     // 各審査員の状態を更新
@@ -45,49 +33,38 @@ async function updateStatus() {
       const votedText = document.getElementById(`voted-text-${i}`);
       
       const voteCount = data.votes[i] || 0;
-      const wasVoteCount = previousVotes[i] || 0;
       
       if (voteCount > 0) {
-        // 投票済み - 赤く光るカードに変更
-        // 投票数に応じて絵文字を変更
+        // 投票済み
         if (voteCount === 1) {
           statusIcon.textContent = '🟡';
         } else if (voteCount === 2) {
           statusIcon.textContent = '🟠';
-        } else if (voteCount >= 3) {
+        } else {
           statusIcon.textContent = '🔴';
         }
         
         votedText.textContent = `${voteCount}票 / 3票`;
         votedText.className = 'text-lg font-bold mt-2 text-white';
         judgeName.className = 'text-2xl font-bold mb-3 text-white';
-        
-        // 赤いカードに変更（アニメーションなし）
         judgeCard.classList.add('voted-card');
         judgeCard.classList.remove('bg-white/90', 'border-black');
       } else {
-        // 未投票 - 通常の白いカードに戻す
+        // 未投票
         statusIcon.textContent = '⚪️';
         votedText.textContent = '0票 / 3票';
         votedText.className = 'text-lg font-semibold mt-2 text-gray-600';
         judgeName.className = 'text-2xl font-bold mb-3 text-gray-900';
-        
-        // 赤いカードをリセット
         judgeCard.classList.remove('voted-card');
         judgeCard.classList.add('bg-white/90', 'border-black');
       }
     }
     
-    // 現在の投票状態を記録
-    previousVotes = { ...data.votes };
-    
-    // IPPONバナー表示（アニメーションなし）
+    // IPPONバナー表示
     const ipponBanner = document.getElementById('ipponBanner');
     
     if (data.isIppon) {
       ipponBanner.classList.remove('hidden');
-      
-      // IPPON音声を1回だけ再生
       if (!hasPlayedIppon) {
         hasPlayedIppon = true;
         ipponAudio.currentTime = 0;
@@ -108,14 +85,9 @@ async function checkYoEvent() {
     const response = await axios.get('/api/yo/latest');
     const data = response.data;
     
-    // 新しいYO〜イベントがあり、まだ再生していない場合のみ再生
     if (data.hasYo && data.yoId !== lastPlayedYoId) {
-      // YO〜音声を再生
       yoAudio.currentTime = 0;
       yoAudio.play().catch(e => console.log('YO音声再生エラー:', e));
-      console.log(`YO〜! from ${data.judgeName} (ID: ${data.yoId})`);
-      
-      // 再生済みとしてIDを記録
       lastPlayedYoId = data.yoId;
     }
   } catch (error) {
@@ -128,7 +100,6 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
   try {
     await axios.post('/api/reset');
     hasPlayedIppon = false;
-    previousVotes = {}; // 前回の投票状態をクリア
     await updateStatus();
   } catch (error) {
     console.error('リセットエラー:', error);
