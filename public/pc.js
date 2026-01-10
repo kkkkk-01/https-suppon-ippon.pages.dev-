@@ -76,30 +76,33 @@ async function updateStatus() {
     // IPPONバナー表示
     const ipponBanner = document.getElementById('ipponBanner');
     
-    if (data.isIppon) {
+    if (data.isIppon && !hasPlayedIppon) {
+      // IPPON達成時のみ表示と音声再生
       ipponBanner.classList.remove('hidden');
-      if (!hasPlayedIppon) {
-        hasPlayedIppon = true;
-        
-        // ゴールデンアニメーションを表示
-        goldenAnimation.classList.add('active');
-        
-        // パーティクルを生成
-        createParticles();
-        
-        // 音声再生
-        ipponAudio.currentTime = 0;
-        ipponAudio.play().catch(e => console.log('音声再生エラー:', e));
-        
-        // 5秒後にアニメーションを非表示
-        setTimeout(() => {
-          goldenAnimation.classList.remove('active');
-          // パーティクルをクリア
-          const particles = goldenAnimation.querySelectorAll('.particle');
-          particles.forEach(p => p.remove());
-        }, 5000);
-      }
+      hasPlayedIppon = true;
+      
+      // ゴールデンアニメーションを表示
+      goldenAnimation.classList.add('active');
+      
+      // パーティクルを生成
+      createParticles();
+      
+      // 音声再生
+      ipponAudio.currentTime = 0;
+      ipponAudio.play().catch(e => console.log('音声再生エラー:', e));
+      
+      // 5秒後にアニメーションを非表示
+      setTimeout(() => {
+        goldenAnimation.classList.remove('active');
+        // パーティクルをクリア
+        const particles = goldenAnimation.querySelectorAll('.particle');
+        particles.forEach(p => p.remove());
+      }, 5000);
+    } else if (data.isIppon) {
+      // IPPON状態が続く場合はバナーのみ表示（音声なし）
+      ipponBanner.classList.remove('hidden');
     } else {
+      // IPPON未達成の場合はバナーを非表示
       ipponBanner.classList.add('hidden');
     }
     
