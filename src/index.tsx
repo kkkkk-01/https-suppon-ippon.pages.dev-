@@ -122,7 +122,10 @@ app.post('/api/reset', async (c) => {
 // API: Vote (from smartphone)
 app.post('/api/vote', async (c) => {
   const { DB } = c.env
-  const { judgeNumber } = await c.req.json()
+  const { judgeNumber, voteCount = 1 } = await c.req.json()
+  
+  // Validate voteCount (1-3)
+  const votesToAdd = Math.min(Math.max(1, voteCount), 3)
   
   // Get current active session
   const session = await DB.prepare(`
@@ -152,12 +155,13 @@ app.post('/api/vote', async (c) => {
   
   const currentCount = currentVote?.vote_count || 0
   
-  // 最大3票まで
-  if (currentCount >= 3) {
-    return c.json({ error: 'Maximum 3 votes per judge', currentCount: 3 }, 400)
-  }
+  // Calculate new count (max 3 votes total)
+  const newCount = Math.min(currentCount + votesToAdd, 3)
   
-  const newCount = currentCount + 1
+  // Check if already at maximum
+  if (currentCount >= 3) {
+    return c.json({ error: 'Maximum 3 votes per judge', voteCount: 3 }, 400)
+  }
   
   // Insert or update vote
   await DB.prepare(`

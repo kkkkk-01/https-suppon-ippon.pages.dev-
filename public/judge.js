@@ -115,15 +115,14 @@ async function voteMultiple(count) {
     showLoadingOverlay(true);  // ローディング表示
     updateButtonStates();  // ボタンを即座に無効化
     
-    // 連続で投票APIを呼び出す
-    for (let i = 0; i < count; i++) {
-      const response = await axios.post('/api/vote', {
-        judgeNumber: judgeNumber
-      });
-      
-      if (!response.data.success) {
-        throw new Error(response.data.error || '投票に失敗しました');
-      }
+    // 1回の API 呼び出しで複数票を投票
+    const response = await axios.post('/api/vote', {
+      judgeNumber: judgeNumber,
+      voteCount: count
+    });
+    
+    if (!response.data.success) {
+      throw new Error(response.data.error || '投票に失敗しました');
     }
     
     // 投票済みフラグを立てる
