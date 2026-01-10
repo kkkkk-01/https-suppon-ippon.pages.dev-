@@ -2,6 +2,7 @@
 let currentVoteCount = 0;
 let hasVoted = false;  // 投票済みフラグ
 let isProcessing = false;  // 処理中フラグ（連続タップ防止）
+let currentSessionId = null;  // 現在のセッションIDを追跡
 
 // 状態を更新
 async function updateStatus() {
@@ -9,15 +10,26 @@ async function updateStatus() {
     const response = await axios.get('/api/status');
     const data = response.data;
     
+    // セッションIDが変わった場合（リセットされた場合）、投票フラグをクリア
+    if (currentSessionId !== null && data.sessionId !== currentSessionId) {
+      console.log('セッションがリセットされました:', currentSessionId, '->', data.sessionId);
+      hasVoted = false;
+      currentVoteCount = 0;
+    }
+    
+    // セッションIDを更新
+    currentSessionId = data.sessionId;
+    
     // 自分の投票数を取得
     currentVoteCount = data.votes[judgeNumber] || 0;
     document.getElementById('currentVoteCount').textContent = currentVoteCount;
     
-    // 投票数に基づいて投票済みフラグを更新（リセット対応）
+    // 投票数に基づいて投票済みフラグを更新
     if (currentVoteCount > 0) {
       hasVoted = true;
-    } else {
-      hasVoted = false;  // リセット後は投票可能に戻す
+    } else if (currentVoteCount === 0 && !isProcessing) {
+      // 投票数が0で処理中でない場合のみ、投票可能に戻す
+      hasVoted = false;
     }
     
     // ボタンの有効/無効を更新
