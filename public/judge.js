@@ -125,8 +125,7 @@ async function sendYo() {
     });
     
     if (response.data.success) {
-      showFeedback('YO〜！送信しました！', 'success');
-      
+      // 通知を削除（軽量化のため）
       // ボタンをアニメーション
       const yoBtn = document.getElementById('yoBtn');
       yoBtn.classList.add('pulse-scale');
@@ -134,7 +133,6 @@ async function sendYo() {
     }
   } catch (error) {
     console.error('YO送信エラー:', error);
-    showFeedback('YO〜送信に失敗しました', 'error');
   } finally {
     // 処理完了（1秒後に解除）
     setTimeout(() => {
