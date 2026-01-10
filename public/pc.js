@@ -9,6 +9,9 @@ const ipponAudio = document.getElementById('ipponAudio');
 const yoAudio = document.getElementById('yoAudio');
 const voteAudio = document.getElementById('voteAudio');
 
+// アニメーション要素
+const goldenAnimation = document.getElementById('goldenAnimation');
+
 // 状態を更新
 async function updateStatus() {
   try {
@@ -77,8 +80,24 @@ async function updateStatus() {
       ipponBanner.classList.remove('hidden');
       if (!hasPlayedIppon) {
         hasPlayedIppon = true;
+        
+        // ゴールデンアニメーションを表示
+        goldenAnimation.classList.add('active');
+        
+        // パーティクルを生成
+        createParticles();
+        
+        // 音声再生
         ipponAudio.currentTime = 0;
         ipponAudio.play().catch(e => console.log('音声再生エラー:', e));
+        
+        // 5秒後にアニメーションを非表示
+        setTimeout(() => {
+          goldenAnimation.classList.remove('active');
+          // パーティクルをクリア
+          const particles = goldenAnimation.querySelectorAll('.particle');
+          particles.forEach(p => p.remove());
+        }, 5000);
       }
     } else {
       ipponBanner.classList.add('hidden');
@@ -102,6 +121,20 @@ async function checkYoEvent() {
     }
   } catch (error) {
     console.error('YO〜イベント取得エラー:', error);
+  }
+}
+
+// パーティクル生成関数
+function createParticles() {
+  const particleCount = 50;
+  for (let i = 0; i < particleCount; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.top = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 2 + 's';
+    particle.style.animationDuration = (2 + Math.random() * 2) + 's';
+    goldenAnimation.appendChild(particle);
   }
 }
 
