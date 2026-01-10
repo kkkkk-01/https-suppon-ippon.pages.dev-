@@ -204,11 +204,6 @@ app.post('/api/yo', async (c) => {
   return c.json({ success: true })
 })
 
-// Root route - redirect to index.html
-app.get('/', (c) => {
-  return c.redirect('/index.html')
-})
-
 // Judge page route - serve judge page
 app.get('/judge/:number', async (c) => {
   const judgeNumber = c.req.param('number')
