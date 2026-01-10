@@ -143,6 +143,16 @@ async function sendYo() {
   }
 }
 
+// ローディングオーバーレイの表示/非表示
+function showLoadingOverlay(show) {
+  const overlay = document.getElementById('loadingOverlay');
+  if (show) {
+    overlay.classList.remove('hidden');
+  } else {
+    overlay.classList.add('hidden');
+  }
+}
+
 // フィードバック表示
 function showFeedback(message, type = 'info') {
   const feedback = document.getElementById('feedback');
