@@ -114,7 +114,7 @@ async function checkYoEvent() {
 document.getElementById('resetBtn').addEventListener('click', async () => {
   try {
     await axios.post('/api/reset');
-    hasPlayedIppon = false;
+    // hasPlayedIpponはリセットしない（セッションIDの変更で自動的にリセットされる）
     await updateStatus();
   } catch (error) {
     console.error('リセットエラー:', error);
