@@ -120,8 +120,8 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
 // 初回読み込み
 updateStatus();
 
-// 定期的に状態を更新（200ms間隔で高速化）
-setInterval(updateStatus, 200);
+// 定期的に状態を更新（100ms間隔で超高速化）
+setInterval(updateStatus, 100);
 
 // YO〜イベントをチェック（1秒間隔）
 setInterval(checkYoEvent, 1000);
