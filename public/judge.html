@@ -106,12 +106,17 @@
       const pathParts = window.location.pathname.split('/');
       const judgeNumber = parseInt(pathParts[pathParts.length - 1]) || 1;
       
-      // 審査員番号を表示
-      document.getElementById('judgeTitle').textContent = `審査員 ${judgeNumber}`;
-      
       console.log('審査員番号:', judgeNumber);
       console.log('judge.js を読み込みます...');
+      
+      // DOMContentLoaded後に審査員番号を表示
+      document.addEventListener('DOMContentLoaded', function() {
+        const judgeTitle = document.getElementById('judgeTitle');
+        if (judgeTitle) {
+          judgeTitle.textContent = `審査員 ${judgeNumber}`;
+        }
+      });
     </script>
-    <script src="/judge.js?v=4"></script>
+    <script src="/judge.js?v=5"></script>
 </body>
 </html>

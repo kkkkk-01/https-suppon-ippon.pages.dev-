@@ -49,6 +49,11 @@ function updateButtonStates() {
   const vote2Btn = document.getElementById('vote2Btn');
   const vote3Btn = document.getElementById('vote3Btn');
   
+  if (!vote1Btn || !vote2Btn || !vote3Btn) {
+    console.error('投票ボタン要素が見つかりません');
+    return;
+  }
+  
   console.log('updateButtonStates:', 'hasVoted:', hasVoted, 'isProcessing:', isProcessing, 'currentVoteCount:', currentVoteCount);
   
   // 既に投票済み、または処理中の場合はすべてのボタンを無効化
@@ -184,6 +189,10 @@ async function sendYo() {
 // ローディングオーバーレイの表示/非表示
 function showLoadingOverlay(show) {
   const overlay = document.getElementById('loadingOverlay');
+  if (!overlay) {
+    console.error('loadingOverlay 要素が見つかりません');
+    return;
+  }
   if (show) {
     overlay.classList.remove('hidden');
   } else {
@@ -195,6 +204,11 @@ function showLoadingOverlay(show) {
 function showFeedback(message, type = 'info') {
   const feedback = document.getElementById('feedback');
   const feedbackText = document.getElementById('feedbackText');
+  
+  if (!feedback || !feedbackText) {
+    console.error('feedback 要素が見つかりません');
+    return;
+  }
   
   feedbackText.textContent = message;
   
@@ -215,14 +229,33 @@ function showFeedback(message, type = 'info') {
   }, 3000);
 }
 
-// イベントリスナー設定
-document.getElementById('vote1Btn').addEventListener('click', () => voteMultiple(1));
-document.getElementById('vote2Btn').addEventListener('click', () => voteMultiple(2));
-document.getElementById('vote3Btn').addEventListener('click', () => voteMultiple(3));
-document.getElementById('yoBtn').addEventListener('click', sendYo);
-
-// 初回読み込み
-updateStatus();
-
-// 定期的に状態を更新（3秒ごと）
-setInterval(updateStatus, 3000);
+// DOM読み込み完了後に初期化
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM読み込み完了 - 初期化を開始します');
+  
+  // イベントリスナー設定
+  const vote1Btn = document.getElementById('vote1Btn');
+  const vote2Btn = document.getElementById('vote2Btn');
+  const vote3Btn = document.getElementById('vote3Btn');
+  const yoBtn = document.getElementById('yoBtn');
+  
+  if (!vote1Btn || !vote2Btn || !vote3Btn || !yoBtn) {
+    console.error('必要な要素が見つかりません');
+    return;
+  }
+  
+  vote1Btn.addEventListener('click', () => voteMultiple(1));
+  vote2Btn.addEventListener('click', () => voteMultiple(2));
+  vote3Btn.addEventListener('click', () => voteMultiple(3));
+  yoBtn.addEventListener('click', sendYo);
+  
+  console.log('イベントリスナー設定完了');
+  
+  // 初回読み込み
+  updateStatus();
+  
+  // 定期的に状態を更新（3秒ごと）
+  setInterval(updateStatus, 3000);
+  
+  console.log('初期化完了');
+});
