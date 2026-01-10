@@ -7,37 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <style>
-      @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-20px); }
-      }
-      .float {
-        animation: float 3s ease-in-out infinite;
-      }
-      @keyframes pulse-scale {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-      }
-      .pulse-scale {
-        animation: pulse-scale 2s ease-in-out infinite;
-      }
-      @keyframes success-flash {
-        0% { background-color: #facc15; }
-        50% { background-color: #22c55e; }
-        100% { background-color: #facc15; }
-      }
-      .success-flash {
-        animation: success-flash 0.5s ease-in-out 1;
-      }
       .suppon-font {
         font-family: 'Arial Black', 'Arial Bold', sans-serif;
         font-weight: 900;
         letter-spacing: 0.1em;
         text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
-      }
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
       }
       .loading-spinner {
         border: 4px solid #f3f3f3;
@@ -45,14 +19,13 @@
         border-radius: 50%;
         width: 40px;
         height: 40px;
-        animation: spin 1s linear infinite;
       }
     </style>
 </head>
 <body class="min-h-screen bg-yellow-400 transition-colors duration-300">
     <div class="container mx-auto p-4 md:p-8 flex flex-col items-center justify-center min-h-screen">
         <!-- ロゴ -->
-        <div class="float mb-6">
+        <div class="mb-6">
             <img src="/suppon-logo.png" alt="すっぽん一本" class="mx-auto w-40 sm:w-52 md:w-64" style="max-width: 250px;">
         </div>
         
@@ -117,6 +90,6 @@
         }
       });
     </script>
-    <script src="/judge.js?v=6"></script>
+    <script src="/judge.js?v=7"></script>
 </body>
 </html>

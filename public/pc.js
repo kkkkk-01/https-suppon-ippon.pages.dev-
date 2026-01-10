@@ -62,15 +62,9 @@ async function updateStatus() {
         votedText.className = 'text-lg font-bold mt-2 text-white';
         judgeName.className = 'text-2xl font-bold mb-3 text-white';
         
-        // 赤く光るアニメーションを追加
+        // 赤いカードに変更（アニメーションなし）
         judgeCard.classList.add('voted-card');
         judgeCard.classList.remove('bg-white/90', 'border-black');
-        
-        // 新規投票の場合、ポップアニメーションを追加
-        if (voteCount > wasVoteCount) {
-          judgeCard.classList.add('vote-pop');
-          setTimeout(() => judgeCard.classList.remove('vote-pop'), 500);
-        }
       } else {
         // 未投票 - 通常の白いカードに戻す
         statusIcon.textContent = '⚪️';
@@ -78,7 +72,7 @@ async function updateStatus() {
         votedText.className = 'text-lg font-semibold mt-2 text-gray-600';
         judgeName.className = 'text-2xl font-bold mb-3 text-gray-900';
         
-        // 赤く光るアニメーションを削除
+        // 赤いカードをリセット
         judgeCard.classList.remove('voted-card');
         judgeCard.classList.add('bg-white/90', 'border-black');
       }
@@ -87,19 +81,11 @@ async function updateStatus() {
     // 現在の投票状態を記録
     previousVotes = { ...data.votes };
     
-    // IPPONバナー表示
+    // IPPONバナー表示（アニメーションなし）
     const ipponBanner = document.getElementById('ipponBanner');
-    const ipponContent = ipponBanner.firstElementChild;
     
     if (data.isIppon) {
-      const wasHidden = ipponBanner.classList.contains('hidden');
       ipponBanner.classList.remove('hidden');
-      
-      // 新しくIPPONになった場合、登場アニメーションを追加
-      if (wasHidden) {
-        ipponContent.classList.add('ippon-appear');
-        setTimeout(() => ipponContent.classList.remove('ippon-appear'), 500);
-      }
       
       // IPPON音声を1回だけ再生
       if (!hasPlayedIppon) {

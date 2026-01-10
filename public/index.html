@@ -8,89 +8,17 @@
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <style>
-          @keyframes ripple {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.5); opacity: 0; }
-          }
-          .ripple {
-            animation: ripple 0.6s ease-out;
-          }
-          @keyframes flash {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-          }
-          .flash {
-            animation: flash 0.3s ease-in-out 3;
-          }
-          @keyframes glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
-            50% { box-shadow: 0 0 40px rgba(239, 68, 68, 1); }
-          }
-          .glow {
-            animation: glow 1s ease-in-out infinite;
-          }
-          /* 投票済みカードの赤く光るアニメーション */
-          @keyframes redPulse {
-            0%, 100% { 
-              background-color: rgba(239, 68, 68, 0.95);
-              box-shadow: 0 0 30px rgba(239, 68, 68, 0.8), 0 0 60px rgba(239, 68, 68, 0.4);
-              transform: scale(1);
-            }
-            50% { 
-              background-color: rgba(220, 38, 38, 1);
-              box-shadow: 0 0 40px rgba(239, 68, 68, 1), 0 0 80px rgba(239, 68, 68, 0.6);
-              transform: scale(1.05);
-            }
-          }
-          .voted-card {
-            animation: redPulse 2s ease-in-out infinite;
-            border-color: #dc2626 !important;
-          }
-          /* 投票時のポップアニメーション */
-          @keyframes votePop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
-          }
-          .vote-pop {
-            animation: votePop 0.5s ease-in-out;
-          }
-          /* IPPONバナーの登場アニメーション */
-          @keyframes ipponAppear {
-            0% { 
-              transform: scale(0.5) translateY(-50px);
-              opacity: 0;
-            }
-            50% {
-              transform: scale(1.1) translateY(0);
-              opacity: 1;
-            }
-            100% {
-              transform: scale(1) translateY(0);
-              opacity: 1;
-            }
-          }
-          .ippon-appear {
-            animation: ipponAppear 0.5s ease-out;
-          }
-          /* SUPPONバナーの軽量化された脈打つアニメーション */
-          @keyframes ipponPulse {
-            0%, 100% { 
-              box-shadow: 0 0 30px rgba(239, 68, 68, 0.6), 0 10px 25px rgba(0, 0, 0, 0.3);
-            }
-            50% { 
-              box-shadow: 0 0 50px rgba(239, 68, 68, 0.9), 0 10px 30px rgba(0, 0, 0, 0.4);
-            }
-          }
-          .ippon-pulse {
-            animation: ipponPulse 2s ease-in-out infinite;
-          }
           /* SUPPONフォント（太字） */
           .suppon-font {
             font-family: 'Arial Black', 'Arial Bold', sans-serif;
             font-weight: 900;
             letter-spacing: 0.15em;
             text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
+          }
+          /* 投票済みカード（アニメーションなし） */
+          .voted-card {
+            background-color: rgba(239, 68, 68, 0.95);
+            border-color: #dc2626 !important;
           }
         </style>
     </head>
@@ -104,13 +32,12 @@
             
             <!-- SUPPONバナー（コンパクト版） -->
             <div id="ipponBanner" class="hidden mb-4">
-                <div class="bg-gradient-to-r from-red-700 via-red-600 to-red-700 text-white text-center py-6 rounded-xl shadow-2xl ippon-pulse">
-                    <div class="text-5xl md:text-6xl font-bold mb-2 suppon-font flex items-center justify-center gap-3">
+                <div class="bg-gradient-to-r from-red-700 via-red-600 to-red-700 text-white text-center py-6 rounded-xl shadow-2xl">
+                    <div class="text-5xl md:text-6xl font-bold suppon-font flex items-center justify-center gap-3">
                         <span class="text-4xl">✨</span>
                         <span class="text-yellow-300">SUPPON!</span>
                         <span class="text-4xl">✨</span>
                     </div>
-                    <div class="text-lg md:text-xl font-semibold text-yellow-100">8票以上が集まりました！</div>
                 </div>
             </div>
             
@@ -169,7 +96,7 @@
         <audio id="ipponAudio" src="/ippon.m4a" preload="auto"></audio>
         <audio id="yoAudio" src="/yo-sound.m4a" preload="auto"></audio>
         
-        <script src="/pc.js?v=2"></script>
+        <script src="/pc.js?v=3"></script>
     </body>
     </html>
   

@@ -134,10 +134,6 @@ async function voteMultiple(count) {
     // 成功フィードバック
     showFeedback(`${count}票投票しました！\n投票完了です`, 'success');
     
-    // 画面を緑色にフラッシュ
-    document.body.classList.add('success-flash');
-    setTimeout(() => document.body.classList.remove('success-flash'), 500);
-    
     // ステータスを更新
     await updateStatus();
   } catch (error) {
@@ -170,10 +166,7 @@ async function sendYo() {
     
     if (response.data.success) {
       // 通知を削除（軽量化のため）
-      // ボタンをアニメーション
-      const yoBtn = document.getElementById('yoBtn');
-      yoBtn.classList.add('pulse-scale');
-      setTimeout(() => yoBtn.classList.remove('pulse-scale'), 2000);
+      // アニメーションなし
     }
   } catch (error) {
     console.error('YO送信エラー:', error);
