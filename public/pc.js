@@ -124,16 +124,16 @@ async function checkYoEvent() {
   }
 }
 
-// パーティクル生成関数
+// パーティクル生成関数（スムーズな配置）
 function createParticles() {
-  const particleCount = 50;
+  const particleCount = 30;
   for (let i = 0; i < particleCount; i++) {
     const particle = document.createElement('div');
     particle.className = 'particle';
     particle.style.left = Math.random() * 100 + '%';
     particle.style.top = Math.random() * 100 + '%';
-    particle.style.animationDelay = Math.random() * 2 + 's';
-    particle.style.animationDuration = (2 + Math.random() * 2) + 's';
+    particle.style.animationDelay = Math.random() * 3 + 's';
+    particle.style.animationDuration = (2 + Math.random() * 1) + 's';
     goldenAnimation.appendChild(particle);
   }
 }
