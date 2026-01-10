@@ -21,9 +21,6 @@ async function updateStatus() {
       previousVotes = {}; // 前回の投票状態をクリア
     }
     
-    // ラウンド番号を更新
-    document.getElementById('roundNumber').textContent = data.roundNumber;
-    
     // 投票カウントを更新
     document.getElementById('voteCount').textContent = data.voteCount;
     
@@ -129,17 +126,14 @@ async function checkYoEvent() {
 
 // リセットボタン
 document.getElementById('resetBtn').addEventListener('click', async () => {
-  if (confirm('次のお題へリセットしますか？')) {
-    try {
-      await axios.post('/api/reset');
-      hasPlayedIppon = false;
-      previousVotes = {}; // 前回の投票状態をクリア
-      await updateStatus();
-      alert('リセットしました！');
-    } catch (error) {
-      console.error('リセットエラー:', error);
-      alert('リセットに失敗しました');
-    }
+  try {
+    await axios.post('/api/reset');
+    hasPlayedIppon = false;
+    previousVotes = {}; // 前回の投票状態をクリア
+    await updateStatus();
+  } catch (error) {
+    console.error('リセットエラー:', error);
+    alert('リセットに失敗しました');
   }
 });
 
