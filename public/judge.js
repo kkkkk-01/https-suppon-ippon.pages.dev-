@@ -13,9 +13,11 @@ async function updateStatus() {
     currentVoteCount = data.votes[judgeNumber] || 0;
     document.getElementById('currentVoteCount').textContent = currentVoteCount;
     
-    // 投票数が0より大きければ投票済みとする
+    // 投票数に基づいて投票済みフラグを更新（リセット対応）
     if (currentVoteCount > 0) {
       hasVoted = true;
+    } else {
+      hasVoted = false;  // リセット後は投票可能に戻す
     }
     
     // ボタンの有効/無効を更新
