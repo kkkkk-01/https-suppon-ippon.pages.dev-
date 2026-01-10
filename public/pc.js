@@ -2,10 +2,12 @@
 let currentSessionId = null;
 let hasPlayedIppon = false;
 let lastPlayedYoId = null;
+let previousTotalVotes = 0;
 
 // 音声要素
 const ipponAudio = document.getElementById('ipponAudio');
 const yoAudio = document.getElementById('yoAudio');
+const voteAudio = document.getElementById('voteAudio');
 
 // 状態を更新
 async function updateStatus() {
@@ -13,11 +15,19 @@ async function updateStatus() {
     const response = await axios.get('/api/status');
     const data = response.data;
     
-    // セッションが変わったらIPPON再生フラグをリセット
+    // セッションが変わったらIPPON再生フラグと投票数をリセット
     if (currentSessionId !== data.sessionId) {
       currentSessionId = data.sessionId;
       hasPlayedIppon = false;
+      previousTotalVotes = 0;
     }
+    
+    // 投票数が増えた場合、投票音を再生
+    if (data.voteCount > previousTotalVotes && previousTotalVotes > 0) {
+      voteAudio.currentTime = 0;
+      voteAudio.play().catch(e => console.log('投票音再生エラー:', e));
+    }
+    previousTotalVotes = data.voteCount;
     
     // 投票カウントを更新
     const voteCountElement = document.getElementById('voteCount');
@@ -100,6 +110,7 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
   try {
     await axios.post('/api/reset');
     hasPlayedIppon = false;
+    previousTotalVotes = 0;
     await updateStatus();
   } catch (error) {
     console.error('リセットエラー:', error);
@@ -120,4 +131,5 @@ setInterval(checkYoEvent, 1000);
 document.addEventListener('click', () => {
   ipponAudio.load();
   yoAudio.load();
+  voteAudio.load();
 }, { once: true });
