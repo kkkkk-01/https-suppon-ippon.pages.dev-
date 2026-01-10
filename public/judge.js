@@ -75,17 +75,29 @@ function updateButtonStates() {
 
 // 投票処理（一括投票）
 async function voteMultiple(count) {
-  console.log('voteMultiple呼び出し:', count, 'hasVoted:', hasVoted, 'isProcessing:', isProcessing);
+  console.log('=== voteMultiple呼び出し ===');
+  console.log('count:', count);
+  console.log('hasVoted:', hasVoted, 'type:', typeof hasVoted);
+  console.log('isProcessing:', isProcessing, 'type:', typeof isProcessing);
+  console.log('judgeNumber:', judgeNumber);
+  console.log('===============================');
+  
+  // 変数が未定義の場合はエラー表示
+  if (typeof hasVoted === 'undefined' || typeof isProcessing === 'undefined') {
+    console.error('致命的エラー: 変数が未初期化です');
+    alert('システムエラーが発生しました。ページをリロードしてください。');
+    return;
+  }
   
   // 既に投票済みの場合は何もしない
-  if (hasVoted) {
+  if (hasVoted === true) {
     console.log('投票済みのため処理をスキップ');
     showFeedback('既に投票済みです', 'error');
     return;
   }
   
   // 処理中の場合は何もしない（連続タップ防止）
-  if (isProcessing) {
+  if (isProcessing === true) {
     console.log('処理中のため処理をスキップ');
     return;
   }
