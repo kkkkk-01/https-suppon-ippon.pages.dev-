@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>審査員 - すっぽん一本</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <style>
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+      }
+      .float {
+        animation: float 3s ease-in-out infinite;
+      }
+      @keyframes pulse-scale {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      .pulse-scale {
+        animation: pulse-scale 2s ease-in-out infinite;
+      }
+      @keyframes success-flash {
+        0% { background-color: #facc15; }
+        50% { background-color: #22c55e; }
+        100% { background-color: #facc15; }
+      }
+      .success-flash {
+        animation: success-flash 0.5s ease-in-out 1;
+      }
+      .suppon-font {
+        font-family: 'Arial Black', 'Arial Bold', sans-serif;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+    </style>
+</head>
+<body class="min-h-screen bg-yellow-400 transition-colors duration-300">
+    <div class="container mx-auto p-4 md:p-8 flex flex-col items-center justify-center min-h-screen">
+        <!-- ロゴ -->
+        <div class="float mb-6">
+            <img src="/suppon-logo.png" alt="すっぽん一本" class="mx-auto w-40 sm:w-52 md:w-64" style="max-width: 250px;">
+        </div>
+        
+        <!-- 審査員番号 -->
+        <h1 id="judgeTitle" class="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-8 suppon-font">
+            審査員 ?
+        </h1>
+        
+        <!-- 現在の投票数表示 -->
+        <div class="bg-white/90 border-4 border-black rounded-lg p-4 mb-8 text-center">
+            <div class="text-lg font-bold text-gray-700">あなたの投票数</div>
+            <div id="currentVoteCount" class="text-5xl font-bold text-red-600">0</div>
+            <div class="text-sm text-gray-600 mt-1">/ 3票</div>
+        </div>
+        
+        <!-- 投票ボタン（1/2/3票） -->
+        <div class="grid grid-cols-3 gap-4 w-full max-w-md mb-8">
+            <button id="vote1Btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-8 rounded-xl text-4xl shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 border-4 border-black suppon-font">
+                1
+            </button>
+            <button id="vote2Btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-8 rounded-xl text-4xl shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 border-4 border-black suppon-font">
+                2
+            </button>
+            <button id="vote3Btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-8 rounded-xl text-4xl shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 border-4 border-black suppon-font">
+                3
+            </button>
+        </div>
+        
+        <!-- YO〜ボタン -->
+        <button id="yoBtn" class="w-full max-w-md bg-purple-600 hover:bg-purple-700 text-white font-bold py-6 rounded-lg text-3xl shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 border-4 border-black mb-6">
+            YO〜！
+        </button>
+        
+        <!-- フィードバック表示 -->
+        <div id="feedback" class="hidden bg-white/90 border-4 border-black rounded-lg p-4 text-center max-w-sm">
+            <div id="feedbackText" class="text-xl font-bold"></div>
+        </div>
+    </div>
+    
+    <!-- ローディングオーバーレイ（処理中表示） -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <div class="text-xl font-bold text-gray-800">処理中...</div>
+            <div class="text-sm text-gray-600 mt-2">お待ちください</div>
+        </div>
+    </div>
+    
+    <script>
+      // URLから審査員番号を取得
+      const pathParts = window.location.pathname.split('/');
+      const judgeNumber = parseInt(pathParts[pathParts.length - 1]) || 1;
+      
+      // 審査員番号を表示
+      document.getElementById('judgeTitle').textContent = `審査員 ${judgeNumber}`;
+    </script>
+    <script src="/judge.js"></script>
+</body>
+</html>

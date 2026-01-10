@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "suppon-ippon",
+  "compatibility_date": "2024-01-01",
+  "pages_build_output_dir": "./dist",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "suppon-ippon-production",
+      "database_id": "6cc47488-e402-4ded-be23-2f3938b8391e"
+    }
+  ]
+}
