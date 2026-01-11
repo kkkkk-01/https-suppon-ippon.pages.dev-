@@ -153,7 +153,7 @@ async function handleReset() {
     await axios.post('/api/reset');
     
     // 新セッション取得を待つ
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 300));
     
     const response = await axios.get('/api/status');
     const data = response.data;
@@ -162,10 +162,13 @@ async function handleReset() {
     currentSessionId = data.sessionId;
     hasPlayedIppon = false;
     previousTotalVotes = data.voteCount;
-    isResetting = false;
     
-    // 画面更新
+    // 画面を更新してからリセットフラグをクリア
     await updateStatus();
+    
+    // 少し待ってからリセットフラグをクリア（ポーリングとの競合を防ぐ）
+    await new Promise(resolve => setTimeout(resolve, 100));
+    isResetting = false;
     
   } catch (error) {
     console.error('リセットエラー:', error);
@@ -183,11 +186,11 @@ function playAudio(audioElement) {
     return;
   }
   
-  // 音声が再生中または一時停止中でない場合のみ再生
-  if (audioElement.paused) {
-    audioElement.currentTime = 0;
-    audioElement.play().catch(e => console.log('音声再生エラー:', e));
-  }
+  // 音声を最初から再生（再生中でも強制的にリセット）
+  audioElement.currentTime = 0;
+  audioElement.play().catch(e => {
+    // エラーが出ても無視（AbortErrorは正常動作）
+  });
 }
 
 // ============================================
