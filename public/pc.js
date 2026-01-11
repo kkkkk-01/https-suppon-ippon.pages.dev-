@@ -219,4 +219,4 @@ document.addEventListener('click', () => {
 // ============================================
 updateStatus();
 setInterval(updateStatus, 100);
-setInterval(checkYoEvent, 1000);
+setInterval(checkYoEvent, 100); // 100ms間隔に高速化
