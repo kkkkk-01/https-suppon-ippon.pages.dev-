@@ -3,7 +3,6 @@ let currentSessionId = null;
 let hasPlayedIppon = false;
 let lastPlayedYoId = null;
 let previousTotalVotes = 0;
-let lastVoteCheckTime = 0; // 投票音の重複防止
 let isResetting = false; // リセット中フラグ
 
 // 音声要素
@@ -21,16 +20,14 @@ async function updateStatus() {
     if (currentSessionId !== data.sessionId) {
       currentSessionId = data.sessionId;
       hasPlayedIppon = false; // 新セッションでは必ずfalseにリセット
-      previousTotalVotes = data.voteCount; // 現在の投票数を初期値に設定（0にしない！）
+      previousTotalVotes = 0; // 投票数を0にリセット
     }
     
-    // 投票数が増えた場合、投票音を再生（500ms以内の重複を防止）
+    // 投票数が増えた場合、投票音を再生
     // リセット中は投票音を再生しない
-    const now = Date.now();
-    if (data.voteCount > previousTotalVotes && now - lastVoteCheckTime > 500 && !isResetting) {
+    if (data.voteCount > previousTotalVotes && !isResetting) {
       voteAudio.currentTime = 0;
       voteAudio.play().catch(e => console.log('投票音再生エラー:', e));
-      lastVoteCheckTime = now;
     }
     previousTotalVotes = data.voteCount;
     
@@ -80,7 +77,7 @@ async function updateStatus() {
     
     // 投票数が8以上で初めてIPPONを達成した時のみ音声再生
     // リセット中は音声を再生しない
-    if (data.isIppon && !hasPlayedIppon && data.voteCount >= 8 && !isResetting) {
+    if (data.isIppon && !hasPlayedIppon && !isResetting) {
       // IPPON達成時のみ表示と音声再生
       ipponBanner.classList.remove('hidden');
       hasPlayedIppon = true;
@@ -123,32 +120,21 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
     isResetting = true; // リセット中フラグを立てる
     await axios.post('/api/reset');
     
-    // リセット後、新しいセッションが検知されるまで待機
-    let attempts = 0;
-    const maxAttempts = 50; // 5秒間待機（100ms × 50回）
+    // 少し待ってから新セッションを検知
+    await new Promise(resolve => setTimeout(resolve, 200));
     
-    while (attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      const response = await axios.get('/api/status');
-      const data = response.data;
-      
-      // 新しいセッションが検知されたらリセット完了
-      if (data.sessionId !== currentSessionId) {
-        currentSessionId = data.sessionId;
-        hasPlayedIppon = false; // IPPON音声フラグをリセット
-        previousTotalVotes = data.voteCount; // 現在の投票数（0）を初期値に設定
-        isResetting = false; // リセット完了
-        break;
-      }
-      
-      attempts++;
-    }
+    // 新セッションを取得
+    const response = await axios.get('/api/status');
+    const data = response.data;
     
-    // タイムアウトした場合もリセットフラグをクリア
-    if (attempts >= maxAttempts) {
-      isResetting = false;
-    }
+    // セッション情報を更新
+    currentSessionId = data.sessionId;
+    hasPlayedIppon = false;
+    previousTotalVotes = data.voteCount; // 現在の投票数（0）を設定
+    isResetting = false; // リセット完了
+    
+    // 画面を更新
+    await updateStatus();
     
   } catch (error) {
     console.error('リセットエラー:', error);
