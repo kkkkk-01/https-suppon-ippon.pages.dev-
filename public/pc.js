@@ -20,14 +20,8 @@ async function updateStatus() {
     // セッションが変わったらIPPON再生フラグと投票数をリセット
     if (currentSessionId !== data.sessionId) {
       currentSessionId = data.sessionId;
-      // リセット中の場合のみIPPON音声を再生しない
-      if (isResetting) {
-        hasPlayedIppon = true;
-        isResetting = false; // リセットフラグをクリア
-      } else {
-        hasPlayedIppon = false; // 通常の新セッションでは音声再生を許可
-      }
-      previousTotalVotes = data.voteCount; // 現在の投票数を初期値に設定
+      hasPlayedIppon = false; // 新セッションでは必ずfalseにリセット
+      previousTotalVotes = 0; // 投票数も0にリセット
     }
     
     // 投票数が増えた場合、投票音を再生（500ms以内の重複を防止）
@@ -84,7 +78,8 @@ async function updateStatus() {
     const ipponBanner = document.getElementById('ipponBanner');
     
     // 投票数が8以上で初めてIPPONを達成した時のみ音声再生
-    if (data.isIppon && !hasPlayedIppon && data.voteCount >= 8) {
+    // リセット中は音声を再生しない
+    if (data.isIppon && !hasPlayedIppon && data.voteCount >= 8 && !isResetting) {
       // IPPON達成時のみ表示と音声再生
       ipponBanner.classList.remove('hidden');
       hasPlayedIppon = true;
@@ -124,10 +119,38 @@ async function checkYoEvent() {
 // リセットボタン
 document.getElementById('resetBtn').addEventListener('click', async () => {
   try {
-    isResetting = true; // リセット開始フラグを立てる
+    isResetting = true; // リセット中フラグを立てる
     await axios.post('/api/reset');
-    // リセット後は自動的にupdateStatus()がセッション変更を検知する
-    // セッション変更時にhasPlayedIppon=trueに設定されるので音は鳴らない
+    
+    // リセット後、新しいセッションが検知されるまで待機
+    let attempts = 0;
+    const maxAttempts = 50; // 5秒間待機（100ms × 50回）
+    
+    while (attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const response = await axios.get('/api/status');
+      const data = response.data;
+      
+      // 新しいセッションが検知されたらリセット完了
+      if (data.sessionId !== currentSessionId) {
+        currentSessionId = data.sessionId;
+        hasPlayedIppon = false;
+        previousTotalVotes = 0;
+        isResetting = false; // リセット完了
+        await updateStatus();
+        break;
+      }
+      
+      attempts++;
+    }
+    
+    // タイムアウトした場合もリセットフラグをクリア
+    if (attempts >= maxAttempts) {
+      isResetting = false;
+      await updateStatus();
+    }
+    
   } catch (error) {
     console.error('リセットエラー:', error);
     alert('リセットに失敗しました');
