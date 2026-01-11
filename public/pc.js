@@ -4,6 +4,7 @@ let hasPlayedIppon = false;
 let lastPlayedYoId = null;
 let previousTotalVotes = 0;
 let lastVoteCheckTime = 0; // 投票音の重複防止
+let isResetting = false; // リセット中フラグ
 
 // 音声要素
 const ipponAudio = document.getElementById('ipponAudio');
@@ -19,7 +20,13 @@ async function updateStatus() {
     // セッションが変わったらIPPON再生フラグと投票数をリセット
     if (currentSessionId !== data.sessionId) {
       currentSessionId = data.sessionId;
-      hasPlayedIppon = true; // 新セッションではIPPON音声を再生しない
+      // リセット中の場合のみIPPON音声を再生しない
+      if (isResetting) {
+        hasPlayedIppon = true;
+        isResetting = false; // リセットフラグをクリア
+      } else {
+        hasPlayedIppon = false; // 通常の新セッションでは音声再生を許可
+      }
       previousTotalVotes = data.voteCount; // 現在の投票数を初期値に設定
     }
     
@@ -117,12 +124,14 @@ async function checkYoEvent() {
 // リセットボタン
 document.getElementById('resetBtn').addEventListener('click', async () => {
   try {
+    isResetting = true; // リセット開始フラグを立てる
     await axios.post('/api/reset');
     // リセット後は自動的にupdateStatus()がセッション変更を検知する
     // セッション変更時にhasPlayedIppon=trueに設定されるので音は鳴らない
   } catch (error) {
     console.error('リセットエラー:', error);
     alert('リセットに失敗しました');
+    isResetting = false; // エラー時はフラグをクリア
   }
 });
 
