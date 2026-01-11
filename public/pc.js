@@ -1,112 +1,140 @@
 // PC集計画面のJavaScript
+
+// ============================================
+// グローバル変数
+// ============================================
 let currentSessionId = null;
 let hasPlayedIppon = false;
 let lastPlayedYoId = null;
 let previousTotalVotes = 0;
-let isResetting = false; // リセット中フラグ
+let isResetting = false;
 
-// 音声要素
+// ============================================
+// DOM要素
+// ============================================
 const ipponAudio = document.getElementById('ipponAudio');
 const yoAudio = document.getElementById('yoAudio');
 const voteAudio = document.getElementById('voteAudio');
+const ipponBanner = document.getElementById('ipponBanner');
+const voteCountElement = document.getElementById('voteCount');
+const resetBtn = document.getElementById('resetBtn');
 
-// 状態を更新
+// ============================================
+// メイン処理: 状態更新
+// ============================================
 async function updateStatus() {
   try {
     const response = await axios.get('/api/status');
     const data = response.data;
     
-    // セッションが変わったらIPPON再生フラグをリセット
+    // セッション変更検知
     if (currentSessionId !== data.sessionId) {
       currentSessionId = data.sessionId;
-      hasPlayedIppon = false; // 新セッションでは必ずfalseにリセット
-      previousTotalVotes = 0; // 投票数を0にリセット
+      hasPlayedIppon = false;
+      previousTotalVotes = 0;
     }
     
-    // 投票数が増えた場合、投票音を再生
-    // リセット中は投票音を再生しない
+    // 投票音再生（リセット中を除く）
     if (data.voteCount > previousTotalVotes && !isResetting) {
-      voteAudio.currentTime = 0;
-      voteAudio.play().catch(e => console.log('投票音再生エラー:', e));
+      playAudio(voteAudio);
     }
     previousTotalVotes = data.voteCount;
     
-    // 投票カウントを更新
-    const voteCountElement = document.getElementById('voteCount');
+    // 投票数表示更新
     if (voteCountElement) {
       voteCountElement.textContent = data.voteCount;
     }
     
-    // 各審査員の状態を更新
-    for (let i = 1; i <= 5; i++) {
-      const judgeCard = document.getElementById(`judge-${i}`);
-      const judgeName = document.getElementById(`judge-name-${i}`);
-      const statusIcon = document.getElementById(`status-${i}`);
-      const votedText = document.getElementById(`voted-text-${i}`);
-      
-      const voteCount = data.votes[i] || 0;
-      
-      if (voteCount > 0) {
-        // 投票済み
-        if (voteCount === 1) {
-          statusIcon.textContent = '🟡';
-        } else if (voteCount === 2) {
-          statusIcon.textContent = '🟠';
-        } else {
-          statusIcon.textContent = '🔴';
-        }
-        
-        votedText.textContent = `${voteCount}票 / 3票`;
-        votedText.className = 'text-lg font-bold mt-2 text-white';
-        judgeName.className = 'text-2xl font-bold mb-3 text-white';
-        judgeCard.classList.add('voted-card');
-        judgeCard.classList.remove('bg-white/90', 'border-black');
-      } else {
-        // 未投票
-        statusIcon.textContent = '⚪️';
-        votedText.textContent = '0票 / 3票';
-        votedText.className = 'text-lg font-semibold mt-2 text-gray-600';
-        judgeName.className = 'text-2xl font-bold mb-3 text-gray-900';
-        judgeCard.classList.remove('voted-card');
-        judgeCard.classList.add('bg-white/90', 'border-black');
-      }
-    }
+    // 審査員状態更新
+    updateJudgesDisplay(data.votes);
     
-    // IPPONバナー表示
-    const ipponBanner = document.getElementById('ipponBanner');
-    
-    // 投票数が8以上で初めてIPPONを達成した時のみ音声再生
-    // リセット中は音声を再生しない
-    if (data.isIppon && !hasPlayedIppon && !isResetting) {
-      // IPPON達成時のみ表示と音声再生
-      ipponBanner.classList.remove('hidden');
-      hasPlayedIppon = true;
-      
-      // 音声再生のみ（アニメーションなし）
-      ipponAudio.currentTime = 0;
-      ipponAudio.play().catch(e => console.log('音声再生エラー:', e));
-    } else if (data.isIppon) {
-      // IPPON状態が続く場合はバナーのみ表示（音声なし）
-      ipponBanner.classList.remove('hidden');
-    } else {
-      // IPPON未達成の場合はバナーを非表示
-      ipponBanner.classList.add('hidden');
-    }
+    // IPPON表示と音声
+    updateIpponDisplay(data.isIppon);
     
   } catch (error) {
     console.error('ステータス取得エラー:', error);
   }
 }
 
-// YO〜イベントをチェック
+// ============================================
+// 審査員表示更新
+// ============================================
+function updateJudgesDisplay(votes) {
+  for (let i = 1; i <= 5; i++) {
+    const judgeCard = document.getElementById(`judge-${i}`);
+    const judgeName = document.getElementById(`judge-name-${i}`);
+    const statusIcon = document.getElementById(`status-${i}`);
+    const votedText = document.getElementById(`voted-text-${i}`);
+    
+    const voteCount = votes[i] || 0;
+    
+    if (voteCount > 0) {
+      // 投票済みスタイル
+      updateVotedJudge(statusIcon, votedText, judgeName, judgeCard, voteCount);
+    } else {
+      // 未投票スタイル
+      updateUnvotedJudge(statusIcon, votedText, judgeName, judgeCard);
+    }
+  }
+}
+
+// 投票済み審査員の表示
+function updateVotedJudge(statusIcon, votedText, judgeName, judgeCard, voteCount) {
+  // アイコン設定
+  if (voteCount === 1) {
+    statusIcon.textContent = '🟡';
+  } else if (voteCount === 2) {
+    statusIcon.textContent = '🟠';
+  } else {
+    statusIcon.textContent = '🔴';
+  }
+  
+  // テキストとスタイル
+  votedText.textContent = `${voteCount}票 / 3票`;
+  votedText.className = 'text-lg font-bold mt-2 text-white';
+  judgeName.className = 'text-2xl font-bold mb-3 text-white';
+  judgeCard.classList.add('voted-card');
+  judgeCard.classList.remove('bg-white/90', 'border-black');
+}
+
+// 未投票審査員の表示
+function updateUnvotedJudge(statusIcon, votedText, judgeName, judgeCard) {
+  statusIcon.textContent = '⚪️';
+  votedText.textContent = '0票 / 3票';
+  votedText.className = 'text-lg font-semibold mt-2 text-gray-600';
+  judgeName.className = 'text-2xl font-bold mb-3 text-gray-900';
+  judgeCard.classList.remove('voted-card');
+  judgeCard.classList.add('bg-white/90', 'border-black');
+}
+
+// ============================================
+// IPPON表示と音声
+// ============================================
+function updateIpponDisplay(isIppon) {
+  if (isIppon && !hasPlayedIppon && !isResetting) {
+    // IPPON達成：バナー表示 + 音声再生
+    ipponBanner.classList.remove('hidden');
+    hasPlayedIppon = true;
+    playAudio(ipponAudio);
+  } else if (isIppon) {
+    // IPPON継続：バナーのみ表示
+    ipponBanner.classList.remove('hidden');
+  } else {
+    // IPPON未達成：バナー非表示
+    ipponBanner.classList.add('hidden');
+  }
+}
+
+// ============================================
+// YO〜イベントチェック
+// ============================================
 async function checkYoEvent() {
   try {
     const response = await axios.get('/api/yo/latest');
     const data = response.data;
     
     if (data.hasYo && data.yoId !== lastPlayedYoId) {
-      yoAudio.currentTime = 0;
-      yoAudio.play().catch(e => console.log('YO音声再生エラー:', e));
+      playAudio(yoAudio);
       lastPlayedYoId = data.yoId;
     }
   } catch (error) {
@@ -114,47 +142,59 @@ async function checkYoEvent() {
   }
 }
 
-// リセットボタン
-document.getElementById('resetBtn').addEventListener('click', async () => {
+// ============================================
+// リセット処理
+// ============================================
+async function handleReset() {
   try {
-    isResetting = true; // リセット中フラグを立てる
+    isResetting = true;
     await axios.post('/api/reset');
     
-    // 少し待ってから新セッションを検知
+    // 新セッション取得を待つ
     await new Promise(resolve => setTimeout(resolve, 200));
     
-    // 新セッションを取得
     const response = await axios.get('/api/status');
     const data = response.data;
     
-    // セッション情報を更新
+    // セッション情報更新
     currentSessionId = data.sessionId;
     hasPlayedIppon = false;
-    previousTotalVotes = data.voteCount; // 現在の投票数（0）を設定
-    isResetting = false; // リセット完了
+    previousTotalVotes = data.voteCount;
+    isResetting = false;
     
-    // 画面を更新
+    // 画面更新
     await updateStatus();
     
   } catch (error) {
     console.error('リセットエラー:', error);
     alert('リセットに失敗しました');
-    isResetting = false; // エラー時はフラグをクリア
+    isResetting = false;
   }
-});
+}
 
-// 初回読み込み
-updateStatus();
+// ============================================
+// ユーティリティ: 音声再生
+// ============================================
+function playAudio(audioElement) {
+  audioElement.currentTime = 0;
+  audioElement.play().catch(e => console.log('音声再生エラー:', e));
+}
 
-// 定期的に状態を更新（100ms間隔で超高速化）
-setInterval(updateStatus, 100);
+// ============================================
+// イベントリスナー設定
+// ============================================
+resetBtn.addEventListener('click', handleReset);
 
-// YO〜イベントをチェック（1秒間隔）
-setInterval(checkYoEvent, 1000);
-
-// ページロード時に音声を準備（ブラウザの自動再生ポリシー対応）
+// 初回クリック時に音声を準備（自動再生ポリシー対応）
 document.addEventListener('click', () => {
   ipponAudio.load();
   yoAudio.load();
   voteAudio.load();
 }, { once: true });
+
+// ============================================
+// 初期化と定期更新
+// ============================================
+updateStatus();
+setInterval(updateStatus, 100);
+setInterval(checkYoEvent, 1000);

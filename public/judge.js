@@ -1,48 +1,69 @@
-// 審査員用JavaScriptロジック
+// 審査員画面のJavaScript
+
+// ============================================
+// グローバル変数
+// ============================================
 let currentVoteCount = 0;
 let hasVoted = false;
 let isProcessing = false;
 let currentSessionId = null;
 
-// 状態を更新
+// ============================================
+// DOM要素
+// ============================================
+let vote1Btn, vote2Btn, vote3Btn, yoBtn;
+let currentVoteCountElement, feedback, feedbackText, loadingOverlay;
+
+// ============================================
+// メイン処理: 状態更新
+// ============================================
 async function updateStatus() {
   try {
     const response = await axios.get('/api/status');
     const data = response.data;
     
-    // セッションIDが変わった場合、投票フラグをクリア
+    // セッション変更検知 → 投票フラグをリセット
     if (currentSessionId !== null && data.sessionId !== currentSessionId) {
-      hasVoted = false;
-      currentVoteCount = 0;
-      isProcessing = false;
+      resetVoteState();
     }
     
+    // 状態更新
     currentSessionId = data.sessionId;
     currentVoteCount = data.votes[judgeNumber] || 0;
-    document.getElementById('currentVoteCount').textContent = currentVoteCount;
-    
     hasVoted = currentVoteCount > 0;
+    
+    // 表示更新
+    if (currentVoteCountElement) {
+      currentVoteCountElement.textContent = currentVoteCount;
+    }
     updateButtonStates();
+    
   } catch (error) {
     console.error('ステータス取得エラー:', error);
   }
 }
 
-// ボタンの状態を更新
+// ============================================
+// 投票状態リセット
+// ============================================
+function resetVoteState() {
+  hasVoted = false;
+  currentVoteCount = 0;
+  isProcessing = false;
+}
+
+// ============================================
+// ボタン状態更新
+// ============================================
 function updateButtonStates() {
-  const vote1Btn = document.getElementById('vote1Btn');
-  const vote2Btn = document.getElementById('vote2Btn');
-  const vote3Btn = document.getElementById('vote3Btn');
-  
-  if (!vote1Btn || !vote2Btn || !vote3Btn) {
-    console.error('投票ボタン要素が見つかりません');
-    return;
-  }
+  if (!vote1Btn || !vote2Btn || !vote3Btn) return;
   
   const shouldDisable = hasVoted || isProcessing;
+  const buttons = [vote1Btn, vote2Btn, vote3Btn];
   
-  [vote1Btn, vote2Btn, vote3Btn].forEach(btn => {
+  buttons.forEach(btn => {
     btn.disabled = shouldDisable;
+    
     if (shouldDisable) {
       btn.classList.add('opacity-50', 'cursor-not-allowed');
     } else {
@@ -51,22 +72,25 @@ function updateButtonStates() {
   });
 }
 
+// ============================================
 // 投票処理
+// ============================================
 async function voteMultiple(count) {
+  // 投票済みチェック
   if (hasVoted) {
     showFeedback('既に投票済みです', 'error');
     return;
   }
   
-  if (isProcessing) {
-    return;
-  }
+  // 処理中チェック
+  if (isProcessing) return;
   
   try {
     isProcessing = true;
     showLoadingOverlay(true);
     updateButtonStates();
     
+    // API呼び出し
     const response = await axios.post('/api/vote', {
       judgeNumber: judgeNumber,
       voteCount: count
@@ -76,10 +100,12 @@ async function voteMultiple(count) {
       throw new Error(response.data.error || '投票に失敗しました');
     }
     
+    // 投票成功
     hasVoted = true;
     showLoadingOverlay(false);
     showFeedback(`${count}票投票しました！\n投票完了です`, 'success');
     await updateStatus();
+    
   } catch (error) {
     console.error('投票エラー:', error);
     showLoadingOverlay(false);
@@ -91,7 +117,9 @@ async function voteMultiple(count) {
   }
 }
 
-// YO〜送信
+// ============================================
+// YO〜送信処理
+// ============================================
 async function sendYo() {
   if (isProcessing) return;
   
@@ -105,27 +133,28 @@ async function sendYo() {
   }
 }
 
-// ローディングオーバーレイの表示/非表示
+// ============================================
+// UI制御: ローディングオーバーレイ
+// ============================================
 function showLoadingOverlay(show) {
-  const overlay = document.getElementById('loadingOverlay');
-  if (!overlay) return;
+  if (!loadingOverlay) return;
   
   if (show) {
-    overlay.classList.remove('hidden');
+    loadingOverlay.classList.remove('hidden');
   } else {
-    overlay.classList.add('hidden');
+    loadingOverlay.classList.add('hidden');
   }
 }
 
-// フィードバック表示
+// ============================================
+// UI制御: フィードバック表示
+// ============================================
 function showFeedback(message, type = 'info') {
-  const feedback = document.getElementById('feedback');
-  const feedbackText = document.getElementById('feedbackText');
-  
   if (!feedback || !feedbackText) return;
   
   feedbackText.textContent = message;
   
+  // カラー設定
   const colorMap = {
     success: 'text-xl font-bold text-green-600',
     error: 'text-xl font-bold text-red-600',
@@ -133,27 +162,38 @@ function showFeedback(message, type = 'info') {
   };
   feedbackText.className = colorMap[type] || colorMap.info;
   
+  // 表示
   feedback.classList.remove('hidden');
   setTimeout(() => feedback.classList.add('hidden'), 3000);
 }
 
-// DOM読み込み完了後に初期化
+// ============================================
+// 初期化
+// ============================================
 document.addEventListener('DOMContentLoaded', function() {
-  const vote1Btn = document.getElementById('vote1Btn');
-  const vote2Btn = document.getElementById('vote2Btn');
-  const vote3Btn = document.getElementById('vote3Btn');
-  const yoBtn = document.getElementById('yoBtn');
+  // DOM要素取得
+  vote1Btn = document.getElementById('vote1Btn');
+  vote2Btn = document.getElementById('vote2Btn');
+  vote3Btn = document.getElementById('vote3Btn');
+  yoBtn = document.getElementById('yoBtn');
+  currentVoteCountElement = document.getElementById('currentVoteCount');
+  feedback = document.getElementById('feedback');
+  feedbackText = document.getElementById('feedbackText');
+  loadingOverlay = document.getElementById('loadingOverlay');
   
+  // 必須要素チェック
   if (!vote1Btn || !vote2Btn || !vote3Btn || !yoBtn) {
     console.error('必要な要素が見つかりません');
     return;
   }
   
+  // イベントリスナー設定
   vote1Btn.addEventListener('click', () => voteMultiple(1));
   vote2Btn.addEventListener('click', () => voteMultiple(2));
   vote3Btn.addEventListener('click', () => voteMultiple(3));
   yoBtn.addEventListener('click', sendYo);
   
+  // 初期化と定期更新
   updateStatus();
   setInterval(updateStatus, 3000);
 });
