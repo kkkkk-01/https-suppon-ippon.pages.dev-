@@ -3,6 +3,8 @@ let currentSessionId = null;
 let hasPlayedIppon = false;
 let lastPlayedYoId = null;
 let previousTotalVotes = 0;
+let isResetting = false; // リセット処理中フラグ
+let lastVoteCheckTime = 0; // 投票音の重複防止
 
 // 音声要素
 const ipponAudio = document.getElementById('ipponAudio');
@@ -12,6 +14,11 @@ const voteAudio = document.getElementById('voteAudio');
 // 状態を更新
 async function updateStatus() {
   try {
+    // リセット処理中は更新をスキップ
+    if (isResetting) {
+      return;
+    }
+    
     const response = await axios.get('/api/status');
     const data = response.data;
     
@@ -22,10 +29,12 @@ async function updateStatus() {
       previousTotalVotes = data.voteCount; // 現在の投票数を初期値に設定
     }
     
-    // 投票数が増えた場合、投票音を再生
-    if (data.voteCount > previousTotalVotes) {
+    // 投票数が増えた場合、投票音を再生（500ms以内の重複を防止）
+    const now = Date.now();
+    if (data.voteCount > previousTotalVotes && now - lastVoteCheckTime > 500) {
       voteAudio.currentTime = 0;
       voteAudio.play().catch(e => console.log('投票音再生エラー:', e));
+      lastVoteCheckTime = now;
     }
     previousTotalVotes = data.voteCount;
     
@@ -113,32 +122,41 @@ async function checkYoEvent() {
 // リセットボタン
 document.getElementById('resetBtn').addEventListener('click', async () => {
   try {
-    await axios.post('/api/reset');
-    // リセット直後は必ず音声を再生しない
-    // セッションIDが変更されるまで待つ
+    // リセット処理中フラグを立てる（ポーリングを停止）
+    isResetting = true;
+    
     const oldSessionId = currentSessionId;
-    hasPlayedIppon = true; // 一時的にtrueにして音声再生を防ぐ
+    await axios.post('/api/reset');
     
     // 新しいセッションIDが返ってくるまで待機（最大3秒）
     for (let i = 0; i < 30; i++) {
       await new Promise(resolve => setTimeout(resolve, 100));
       const response = await axios.get('/api/status');
+      
       if (response.data.sessionId !== oldSessionId) {
-        // 新しいセッションを検知したら正常にリセット
+        // 新しいセッションを検知
         currentSessionId = response.data.sessionId;
         hasPlayedIppon = false;
         previousTotalVotes = 0;
+        
+        // リセット完了
+        isResetting = false;
+        
+        // 状態を更新
         await updateStatus();
         return;
       }
     }
     
-    // タイムアウト（念のため）
+    // タイムアウト時も正常にリセット
     hasPlayedIppon = false;
+    previousTotalVotes = 0;
+    isResetting = false;
     await updateStatus();
   } catch (error) {
     console.error('リセットエラー:', error);
     alert('リセットに失敗しました');
+    isResetting = false;
   }
 });
 
