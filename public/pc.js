@@ -8,6 +8,7 @@ let hasPlayedIppon = false;
 let lastPlayedYoId = null;
 let previousTotalVotes = 0;
 let isResetting = false;
+let audioInitialized = false; // 音声初期化フラグ
 
 // ============================================
 // DOM要素
@@ -177,6 +178,11 @@ async function handleReset() {
 // ユーティリティ: 音声再生
 // ============================================
 function playAudio(audioElement) {
+  // 音声が初期化されていない場合はスキップ
+  if (!audioInitialized) {
+    return;
+  }
+  
   // 音声が再生中または一時停止中でない場合のみ再生
   if (audioElement.paused) {
     audioElement.currentTime = 0;
@@ -197,13 +203,16 @@ document.addEventListener('click', () => {
   voteAudio.load();
   
   // ミュート再生して自動再生許可を得る
-  [ipponAudio, yoAudio, voteAudio].forEach(audio => {
+  Promise.all([ipponAudio, yoAudio, voteAudio].map(audio => {
     audio.muted = true;
-    audio.play().then(() => {
+    return audio.play().then(() => {
       audio.pause();
       audio.currentTime = 0;
       audio.muted = false;
     }).catch(e => console.log('音声初期化:', e));
+  })).then(() => {
+    // 全ての音声が初期化完了
+    audioInitialized = true;
   });
 }, { once: true });
 
