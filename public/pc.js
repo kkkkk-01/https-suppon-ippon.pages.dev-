@@ -191,9 +191,20 @@ resetBtn.addEventListener('click', handleReset);
 
 // 初回クリック時に音声を準備（自動再生ポリシー対応）
 document.addEventListener('click', () => {
+  // 音声を読み込み
   ipponAudio.load();
   yoAudio.load();
   voteAudio.load();
+  
+  // ミュート再生して自動再生許可を得る
+  [ipponAudio, yoAudio, voteAudio].forEach(audio => {
+    audio.muted = true;
+    audio.play().then(() => {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.muted = false;
+    }).catch(e => console.log('音声初期化:', e));
+  });
 }, { once: true });
 
 // ============================================
