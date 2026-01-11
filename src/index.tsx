@@ -111,12 +111,17 @@ app.post('/api/reset', async (c) => {
   await DB.prepare(`UPDATE sessions SET is_active = 0`).run()
   
   // Create new session
-  await DB.prepare(`
+  const result = await DB.prepare(`
     INSERT INTO sessions (round_number, is_active, created_at)
     VALUES (?, 1, CURRENT_TIMESTAMP)
   `).bind(nextRound).run()
   
-  return c.json({ success: true, round: nextRound })
+  // Return new session ID
+  return c.json({ 
+    success: true, 
+    round: nextRound,
+    sessionId: result.meta.last_row_id
+  })
 })
 
 // API: Vote (from smartphone)

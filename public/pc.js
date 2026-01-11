@@ -150,24 +150,19 @@ async function checkYoEvent() {
 async function handleReset() {
   try {
     isResetting = true;
-    await axios.post('/api/reset');
     
-    // 新セッション取得を待つ
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // リセットAPIを呼ぶ
+    const resetResponse = await axios.post('/api/reset');
     
-    const response = await axios.get('/api/status');
-    const data = response.data;
+    // 新しいセッションIDを直接取得
+    const newSessionId = resetResponse.data.sessionId;
     
-    // セッション情報更新
-    currentSessionId = data.sessionId;
+    // セッション情報を即座に更新
+    currentSessionId = newSessionId;
     hasPlayedIppon = false;
-    previousTotalVotes = data.voteCount;
+    previousTotalVotes = 0;
     
-    // 画面を更新してからリセットフラグをクリア
-    await updateStatus();
-    
-    // 少し待ってからリセットフラグをクリア（ポーリングとの競合を防ぐ）
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // リセットフラグをクリア
     isResetting = false;
     
   } catch (error) {
