@@ -35,15 +35,9 @@ async function updateStatus() {
     }
     
     // 投票音再生（リセット中を除く）
-    // 投票数が増えた分だけ音声を再生
+    // 投票数が増えたら1回だけ音声を再生
     if (data.voteCount > previousTotalVotes && !isResetting) {
-      const voteDiff = data.voteCount - previousTotalVotes;
-      // 増えた票数分だけ音声を再生（最大3回まで）
-      for (let i = 0; i < Math.min(voteDiff, 3); i++) {
-        setTimeout(() => {
-          playAudio(voteAudio);
-        }, i * 100); // 100ms間隔で再生
-      }
+      playAudio(voteAudio);
     }
     previousTotalVotes = data.voteCount;
     
