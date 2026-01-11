@@ -128,18 +128,19 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
     const oldSessionId = currentSessionId;
     await axios.post('/api/reset');
     
-    // 新しいセッションIDが返ってくるまで待機（最大3秒）
-    for (let i = 0; i < 30; i++) {
+    // 新しいセッションIDかつisIppon=falseが返ってくるまで待機（最大5秒）
+    for (let i = 0; i < 50; i++) {
       await new Promise(resolve => setTimeout(resolve, 100));
       const response = await axios.get('/api/status');
       
-      if (response.data.sessionId !== oldSessionId) {
-        // 新しいセッションを検知
+      // 新しいセッション かつ IPPON未達成（投票数0）を確認
+      if (response.data.sessionId !== oldSessionId && response.data.isIppon === false) {
+        // 確実にリセット完了
         currentSessionId = response.data.sessionId;
         hasPlayedIppon = false;
         previousTotalVotes = 0;
         
-        // リセット完了
+        // ここでリセット完了（ポーリング再開）
         isResetting = false;
         
         // 状態を更新
@@ -148,7 +149,9 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
       }
     }
     
-    // タイムアウト時も正常にリセット
+    // タイムアウト時も正常にリセット（念のため）
+    const response = await axios.get('/api/status');
+    currentSessionId = response.data.sessionId;
     hasPlayedIppon = false;
     previousTotalVotes = 0;
     isResetting = false;
