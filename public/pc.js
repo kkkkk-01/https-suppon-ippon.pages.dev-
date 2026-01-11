@@ -17,16 +17,17 @@ async function updateStatus() {
     const response = await axios.get('/api/status');
     const data = response.data;
     
-    // セッションが変わったらIPPON再生フラグと投票数をリセット
+    // セッションが変わったらIPPON再生フラグをリセット
     if (currentSessionId !== data.sessionId) {
       currentSessionId = data.sessionId;
       hasPlayedIppon = false; // 新セッションでは必ずfalseにリセット
-      previousTotalVotes = 0; // 投票数も0にリセット
+      previousTotalVotes = data.voteCount; // 現在の投票数を初期値に設定（0にしない！）
     }
     
     // 投票数が増えた場合、投票音を再生（500ms以内の重複を防止）
+    // リセット中は投票音を再生しない
     const now = Date.now();
-    if (data.voteCount > previousTotalVotes && now - lastVoteCheckTime > 500) {
+    if (data.voteCount > previousTotalVotes && now - lastVoteCheckTime > 500 && !isResetting) {
       voteAudio.currentTime = 0;
       voteAudio.play().catch(e => console.log('投票音再生エラー:', e));
       lastVoteCheckTime = now;
@@ -135,10 +136,9 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
       // 新しいセッションが検知されたらリセット完了
       if (data.sessionId !== currentSessionId) {
         currentSessionId = data.sessionId;
-        hasPlayedIppon = false;
-        previousTotalVotes = 0;
+        hasPlayedIppon = false; // IPPON音声フラグをリセット
+        previousTotalVotes = data.voteCount; // 現在の投票数（0）を初期値に設定
         isResetting = false; // リセット完了
-        await updateStatus();
         break;
       }
       
@@ -148,7 +148,6 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
     // タイムアウトした場合もリセットフラグをクリア
     if (attempts >= maxAttempts) {
       isResetting = false;
-      await updateStatus();
     }
     
   } catch (error) {
