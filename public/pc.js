@@ -8,7 +8,6 @@ let hasPlayedIppon = false;
 let lastPlayedYoId = null;
 let previousTotalVotes = 0;
 let isResetting = false;
-let lastVotePlayTime = 0; // 投票音の最終再生時刻
 
 // ============================================
 // DOM要素
@@ -36,11 +35,15 @@ async function updateStatus() {
     }
     
     // 投票音再生（リセット中を除く）
-    // 150ms以内の重複再生を防止（100msポーリングで1回スキップ）
-    const now = Date.now();
-    if (data.voteCount > previousTotalVotes && !isResetting && (now - lastVotePlayTime) > 150) {
-      playAudio(voteAudio);
-      lastVotePlayTime = now;
+    // 投票数が増えた分だけ音声を再生
+    if (data.voteCount > previousTotalVotes && !isResetting) {
+      const voteDiff = data.voteCount - previousTotalVotes;
+      // 増えた票数分だけ音声を再生（最大3回まで）
+      for (let i = 0; i < Math.min(voteDiff, 3); i++) {
+        setTimeout(() => {
+          playAudio(voteAudio);
+        }, i * 100); // 100ms間隔で再生
+      }
     }
     previousTotalVotes = data.voteCount;
     
