@@ -177,8 +177,11 @@ async function handleReset() {
 // ユーティリティ: 音声再生
 // ============================================
 function playAudio(audioElement) {
-  audioElement.currentTime = 0;
-  audioElement.play().catch(e => console.log('音声再生エラー:', e));
+  // 音声が再生中または一時停止中でない場合のみ再生
+  if (audioElement.paused) {
+    audioElement.currentTime = 0;
+    audioElement.play().catch(e => console.log('音声再生エラー:', e));
+  }
 }
 
 // ============================================
