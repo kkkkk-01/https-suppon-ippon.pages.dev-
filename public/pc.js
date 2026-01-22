@@ -53,6 +53,12 @@ async function updateStatus() {
     // IPPON表示と音声
     updateIpponDisplay(data.isIppon);
     
+    // YO〜イベントチェック（同じレスポンスに含まれる）
+    if (data.yo && data.yo.hasYo && data.yo.yoId !== lastPlayedYoId) {
+      playAudio(yoAudio);
+      lastPlayedYoId = data.yo.yoId;
+    }
+    
   } catch (error) {
     console.error('ステータス取得エラー:', error);
   }
@@ -127,22 +133,7 @@ function updateIpponDisplay(isIppon) {
   }
 }
 
-// ============================================
-// YO〜イベントチェック
-// ============================================
-async function checkYoEvent() {
-  try {
-    const response = await axios.get('/api/yo/latest');
-    const data = response.data;
-    
-    if (data.hasYo && data.yoId !== lastPlayedYoId) {
-      playAudio(yoAudio);
-      lastPlayedYoId = data.yoId;
-    }
-  } catch (error) {
-    console.error('YO〜イベント取得エラー:', error);
-  }
-}
+// YO〜イベントは updateStatus() 内で処理するため削除
 
 // ============================================
 // リセット処理
@@ -218,14 +209,12 @@ document.addEventListener('click', () => {
 // 初期化と定期更新
 // ============================================
 let statusIntervalId = null;
-let yoIntervalId = null;
 
 // ポーリング開始
 function startPolling() {
   if (!statusIntervalId) {
     updateStatus();
-    statusIntervalId = setInterval(updateStatus, 500); // 500ms間隔
-    yoIntervalId = setInterval(checkYoEvent, 500);     // 500ms間隔
+    statusIntervalId = setInterval(updateStatus, 250); // 250ms間隔
   }
 }
 
@@ -233,9 +222,7 @@ function startPolling() {
 function stopPolling() {
   if (statusIntervalId) {
     clearInterval(statusIntervalId);
-    clearInterval(yoIntervalId);
     statusIntervalId = null;
-    yoIntervalId = null;
   }
 }
 

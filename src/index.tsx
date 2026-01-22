@@ -50,13 +50,27 @@ app.get('/api/status', async (c) => {
   // 8票以上（15票の8/15以上）でIPPON
   const isIppon = totalVoteCount >= 8
   
+  // Get latest YO event for this session
+  const yoEvent = await DB.prepare(`
+    SELECT id, created_at FROM yo_events
+    WHERE session_id = ?
+    ORDER BY id DESC LIMIT 1
+  `).bind(session.id).first<{ id: number, created_at: string }>()
+  
   return c.json({
     sessionId: session.id,
     roundNumber: session.round_number,
     voteCount: totalVoteCount,
     maxVotes: 15,
     votes,
-    isIppon
+    isIppon,
+    yo: yoEvent ? {
+      hasYo: true,
+      yoId: yoEvent.id,
+      timestamp: yoEvent.created_at
+    } : {
+      hasYo: false
+    }
   })
 })
 
