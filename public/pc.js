@@ -30,14 +30,22 @@ async function updateStatus() {
     
     // セッション変更検知
     if (currentSessionId !== data.sessionId) {
+      console.log('🔄 セッション変更:', { old: currentSessionId, new: data.sessionId });
       currentSessionId = data.sessionId;
       hasPlayedIppon = false;
       previousTotalVotes = 0;
     }
     
-    // 投票音再生（リセット中を除く）
+    // 投票音再生
     // 投票数が増えたら1回だけ音声を再生
-    if (data.voteCount > previousTotalVotes && !isResetting) {
+    console.log('🎯 投票チェック:', { 
+      voteCount: data.voteCount, 
+      previousTotalVotes,
+      shouldPlay: data.voteCount > previousTotalVotes
+    });
+    
+    if (data.voteCount > previousTotalVotes) {
+      console.log('🔔 投票音を再生');
       playAudio(voteAudio);
     }
     previousTotalVotes = data.voteCount;
@@ -140,7 +148,8 @@ function updateIpponDisplay(isIppon) {
 // ============================================
 async function handleReset() {
   try {
-    isResetting = true;
+    // リセットAPIを呼ぶ前にポーリングを一時停止
+    stopPolling();
     
     // リセットAPIを呼ぶ
     const resetResponse = await axios.post('/api/reset');
@@ -153,16 +162,17 @@ async function handleReset() {
     hasPlayedIppon = false;
     previousTotalVotes = 0;
     
-    // 300ms待機してポーリングとの競合を完全に防ぐ
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // 100ms待機してリセットを確実に完了
+    await new Promise(resolve => setTimeout(resolve, 100));
     
-    // リセットフラグをクリア
-    isResetting = false;
+    // ポーリングを再開
+    startPolling();
     
   } catch (error) {
     console.error('リセットエラー:', error);
     alert('リセットに失敗しました');
-    isResetting = false;
+    // エラー時もポーリングを再開
+    startPolling();
   }
 }
 
