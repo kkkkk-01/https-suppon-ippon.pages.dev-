@@ -77,6 +77,11 @@ async function updateStatus() {
 // 審査員表示更新
 // ============================================
 function updateJudgesDisplay(votes) {
+  // votesが無い場合のデフォルト値
+  if (!votes) {
+    votes = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  }
+  
   for (let i = 1; i <= 5; i++) {
     const judgeCard = document.getElementById(`judge-${i}`);
     const judgeName = document.getElementById(`judge-name-${i}`);
