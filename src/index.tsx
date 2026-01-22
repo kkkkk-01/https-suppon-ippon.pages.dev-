@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 
 // メンテナンスモード（true: メンテナンス中, false: 通常運用）
-const MAINTENANCE_MODE = false
+const MAINTENANCE_MODE = true
 
 type Bindings = {
   DB: D1Database
