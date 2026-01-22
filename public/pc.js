@@ -7,9 +7,7 @@ let currentSessionId = null;
 let hasPlayedIppon = false;
 let lastPlayedYoId = null;
 let previousTotalVotes = 0;
-let isResetting = false;
 let audioInitialized = false; // 音声初期化フラグ
-let skipNextVoteSound = false; // リセット直後の音声スキップフラグ
 
 // ============================================
 // DOM要素
@@ -31,17 +29,13 @@ async function updateStatus() {
     
     // セッション変更検知
     if (currentSessionId !== data.sessionId) {
-      console.log('🔄 セッション変更:', { old: currentSessionId, new: data.sessionId, isResetting });
+      console.log('🔄 セッション変更:', { old: currentSessionId, new: data.sessionId });
       currentSessionId = data.sessionId;
       hasPlayedIppon = false;
-      previousTotalVotes = data.voteCount; // ← 現在の投票数で初期化（0にしない）
-      
-      // リセット中のセッション変更なら音をスキップ
-      if (isResetting) {
-        skipNextVoteSound = true;
-        console.log('🛑 リセット中のセッション変更: 音声スキップフラグON');
-      }
+      previousTotalVotes = data.voteCount; // ← 現在の投票数で初期化（音を防ぐ）
+      console.log('✅ セッション変更完了: previousTotalVotes =', previousTotalVotes);
       return; // セッション変更時は音声チェックをスキップ
+    }
     }
     
     // 投票音再生
@@ -164,32 +158,19 @@ async function handleReset() {
   try {
     console.log('🔄 リセット開始');
     
-    // リセットフラグをON
-    isResetting = true;
-    skipNextVoteSound = true;
-    
-    // リセットAPIを呼ぶ前にポーリングを一時停止
+    // ポーリングを一時停止
     stopPolling();
     
     // リセットAPIを呼ぶ
     const resetResponse = await axios.post('/api/reset');
     
-    // 新しいセッションIDを直接取得
-    const newSessionId = resetResponse.data.sessionId;
-    
-    // セッション情報を即座に更新
-    currentSessionId = newSessionId;
-    hasPlayedIppon = false;
-    previousTotalVotes = 0;
+    console.log('✅ リセットAPI完了:', resetResponse.data);
     
     // 100ms待機してリセットを確実に完了
     await new Promise(resolve => setTimeout(resolve, 100));
     
-    // ポーリングを再開
+    // ポーリングを再開（セッション変更は updateStatus() で自動検知される）
     startPolling();
-    
-    // リセットフラグをOFF（ポーリング再開後）
-    isResetting = false;
     
     console.log('✅ リセット完了');
     
@@ -197,8 +178,6 @@ async function handleReset() {
     console.error('リセットエラー:', error);
     alert('リセットに失敗しました');
     // エラー時もポーリングを再開
-    isResetting = false;
-    skipNextVoteSound = false;
     startPolling();
   }
 }
