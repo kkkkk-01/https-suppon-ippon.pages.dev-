@@ -153,6 +153,9 @@ async function handleReset() {
     hasPlayedIppon = false;
     previousTotalVotes = 0;
     
+    // 300ms待機してポーリングとの競合を完全に防ぐ
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
     // リセットフラグをクリア
     isResetting = false;
     
