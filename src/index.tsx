@@ -318,7 +318,7 @@ app.get('/', (c) => {
         <audio id="yoAudio" src="/yo-sound.m4a" preload="auto"></audio>
         <audio id="voteAudio" src="/vote-sound.mp3" preload="auto"></audio>
         
-        <script src="/pc.js?v=44"></script>
+        <script src="/pc.js?v=45"></script>
     </body>
     </html>
   `)

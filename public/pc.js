@@ -233,7 +233,7 @@ let statusIntervalId = null;
 function startPolling() {
   if (!statusIntervalId) {
     updateStatus();
-    statusIntervalId = setInterval(updateStatus, 250); // 250ms間隔
+    statusIntervalId = setInterval(updateStatus, 500); // 500ms間隔
   }
 }
 
