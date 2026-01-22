@@ -36,25 +36,18 @@ async function updateStatus() {
       console.log('✅ セッション変更完了: previousTotalVotes =', previousTotalVotes);
       return; // セッション変更時は音声チェックをスキップ
     }
-    }
     
     // 投票音再生
     // 投票数が増えたら1回だけ音声を再生
     console.log('🎯 投票チェック:', { 
       voteCount: data.voteCount, 
       previousTotalVotes,
-      skipNextVoteSound,
-      shouldPlay: data.voteCount > previousTotalVotes && !skipNextVoteSound
+      shouldPlay: data.voteCount > previousTotalVotes
     });
     
     if (data.voteCount > previousTotalVotes) {
-      if (skipNextVoteSound) {
-        console.log('⏭️ 音声スキップ（リセット直後）');
-        skipNextVoteSound = false;
-      } else {
-        console.log('🔔 投票音を再生');
-        playAudio(voteAudio);
-      }
+      console.log('🔔 投票音を再生');
+      playAudio(voteAudio);
     }
     previousTotalVotes = data.voteCount;
     
@@ -162,9 +155,7 @@ async function handleReset() {
     stopPolling();
     
     // リセットAPIを呼ぶ
-    const resetResponse = await axios.post('/api/reset');
-    
-    console.log('✅ リセットAPI完了:', resetResponse.data);
+    await axios.post('/api/reset');
     
     // 100ms待機してリセットを確実に完了
     await new Promise(resolve => setTimeout(resolve, 100));
