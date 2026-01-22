@@ -1,11 +1,49 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 
+// メンテナンスモード（true: メンテナンス中, false: 通常運用）
+const MAINTENANCE_MODE = false
+
 type Bindings = {
   DB: D1Database
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
+
+// メンテナンスモードチェック（APIとfaviconを除外）
+app.use('*', async (c, next) => {
+  const path = c.req.path
+  // API、favicon、judge画面は除外
+  if (!path.startsWith('/api/') && path !== '/favicon.ico' && !path.startsWith('/judge/')) {
+    if (MAINTENANCE_MODE) {
+      return c.html(`
+        <!DOCTYPE html>
+        <html lang="ja">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>メンテナンス中 - 素人一本</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+        </head>
+        <body class="min-h-screen bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md text-center">
+                <div class="text-6xl mb-4">🔧</div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-4">メンテナンス中</h1>
+                <p class="text-gray-600 mb-6">
+                    現在、システムメンテナンスを実施しております。<br>
+                    しばらくお待ちください。
+                </p>
+                <div class="text-sm text-gray-500">
+                    素人一本システム
+                </div>
+            </div>
+        </body>
+        </html>
+      `)
+    }
+  }
+  await next()
+})
 
 // Enable CORS
 app.use('/api/*', cors())
