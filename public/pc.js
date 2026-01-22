@@ -217,6 +217,36 @@ document.addEventListener('click', () => {
 // ============================================
 // 初期化と定期更新
 // ============================================
-updateStatus();
-setInterval(updateStatus, 100);
-setInterval(checkYoEvent, 100); // 100ms間隔に高速化
+let statusIntervalId = null;
+let yoIntervalId = null;
+
+// ポーリング開始
+function startPolling() {
+  if (!statusIntervalId) {
+    updateStatus();
+    statusIntervalId = setInterval(updateStatus, 500); // 500ms間隔
+    yoIntervalId = setInterval(checkYoEvent, 500);     // 500ms間隔
+  }
+}
+
+// ポーリング停止
+function stopPolling() {
+  if (statusIntervalId) {
+    clearInterval(statusIntervalId);
+    clearInterval(yoIntervalId);
+    statusIntervalId = null;
+    yoIntervalId = null;
+  }
+}
+
+// 画面の表示/非表示でポーリングを制御
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    stopPolling(); // 画面が非表示になったら停止
+  } else {
+    startPolling(); // 画面が表示されたら再開
+  }
+});
+
+// 初回起動
+startPolling();
