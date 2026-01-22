@@ -7,6 +7,7 @@ let currentSessionId = null;
 let hasPlayedIppon = false;
 let lastPlayedYoId = null;
 let previousTotalVotes = 0;
+let isResetting = false; // リセット中フラグ
 let audioInitialized = false; // 音声初期化フラグ
 
 // ============================================
@@ -155,6 +156,7 @@ function updateIpponDisplay(isIppon) {
 async function handleReset() {
   try {
     console.log('🔄 リセット開始');
+    isResetting = true;
     
     // ポーリングを一時停止
     stopPolling();
@@ -168,11 +170,13 @@ async function handleReset() {
     // ポーリングを再開（セッション変更は updateStatus() で自動検知される）
     startPolling();
     
+    isResetting = false;
     console.log('✅ リセット完了');
     
   } catch (error) {
     console.error('リセットエラー:', error);
     alert('リセットに失敗しました');
+    isResetting = false;
     // エラー時もポーリングを再開
     startPolling();
   }
