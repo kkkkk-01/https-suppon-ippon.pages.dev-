@@ -9,6 +9,7 @@ let lastPlayedYoId = null;
 let previousTotalVotes = 0;
 let isResetting = false;
 let audioInitialized = false; // 音声初期化フラグ
+let skipNextVoteSound = false; // リセット直後の音声スキップフラグ
 
 // ============================================
 // DOM要素
@@ -30,10 +31,17 @@ async function updateStatus() {
     
     // セッション変更検知
     if (currentSessionId !== data.sessionId) {
-      console.log('🔄 セッション変更:', { old: currentSessionId, new: data.sessionId });
+      console.log('🔄 セッション変更:', { old: currentSessionId, new: data.sessionId, isResetting });
       currentSessionId = data.sessionId;
       hasPlayedIppon = false;
-      previousTotalVotes = 0;
+      previousTotalVotes = data.voteCount; // ← 現在の投票数で初期化（0にしない）
+      
+      // リセット中のセッション変更なら音をスキップ
+      if (isResetting) {
+        skipNextVoteSound = true;
+        console.log('🛑 リセット中のセッション変更: 音声スキップフラグON');
+      }
+      return; // セッション変更時は音声チェックをスキップ
     }
     
     // 投票音再生
@@ -41,12 +49,18 @@ async function updateStatus() {
     console.log('🎯 投票チェック:', { 
       voteCount: data.voteCount, 
       previousTotalVotes,
-      shouldPlay: data.voteCount > previousTotalVotes
+      skipNextVoteSound,
+      shouldPlay: data.voteCount > previousTotalVotes && !skipNextVoteSound
     });
     
     if (data.voteCount > previousTotalVotes) {
-      console.log('🔔 投票音を再生');
-      playAudio(voteAudio);
+      if (skipNextVoteSound) {
+        console.log('⏭️ 音声スキップ（リセット直後）');
+        skipNextVoteSound = false;
+      } else {
+        console.log('🔔 投票音を再生');
+        playAudio(voteAudio);
+      }
     }
     previousTotalVotes = data.voteCount;
     
@@ -148,6 +162,12 @@ function updateIpponDisplay(isIppon) {
 // ============================================
 async function handleReset() {
   try {
+    console.log('🔄 リセット開始');
+    
+    // リセットフラグをON
+    isResetting = true;
+    skipNextVoteSound = true;
+    
     // リセットAPIを呼ぶ前にポーリングを一時停止
     stopPolling();
     
@@ -168,10 +188,17 @@ async function handleReset() {
     // ポーリングを再開
     startPolling();
     
+    // リセットフラグをOFF（ポーリング再開後）
+    isResetting = false;
+    
+    console.log('✅ リセット完了');
+    
   } catch (error) {
     console.error('リセットエラー:', error);
     alert('リセットに失敗しました');
     // エラー時もポーリングを再開
+    isResetting = false;
+    skipNextVoteSound = false;
     startPolling();
   }
 }
