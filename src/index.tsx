@@ -326,7 +326,7 @@ app.get('/judge/:number', async (c) => {
   return c.html(html)
 })
 
-// Serve static files
+// Serve static files (must be before catch-all routes)
 app.use('/*', serveStatic({ root: './' }))
 
 export default app
