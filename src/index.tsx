@@ -227,6 +227,11 @@ app.post('/api/yo', async (c) => {
   return c.json({ success: true })
 })
 
+// Favicon route - return 204 No Content to avoid errors
+app.get('/favicon.ico', (c) => {
+  return c.body(null, 204)
+})
+
 // Root route - serve PC page
 app.get('/', (c) => {
   return c.html(`
