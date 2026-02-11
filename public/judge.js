@@ -105,6 +105,7 @@ async function voteMultiple(count) {
     showLoadingOverlay(false);
     showFeedback(`${count}票投票しました！\n投票完了です`, 'success');
     await updateStatus();
+    updateButtonStates();  // ボタン状態を更新
     
   } catch (error) {
     console.error('投票エラー:', error);

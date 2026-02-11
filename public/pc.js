@@ -9,6 +9,7 @@ let lastPlayedYoId = null;
 let previousTotalVotes = 0;
 let isResetting = false; // リセット中フラグ
 let audioInitialized = false; // 音声初期化フラグ
+let previousVotedStatus = {}; // 前回の投票状態（0票対応）
 
 // ============================================
 // DOM要素
@@ -34,22 +35,33 @@ async function updateStatus() {
       currentSessionId = data.sessionId;
       hasPlayedIppon = false;
       previousTotalVotes = data.voteCount; // ← 現在の投票数で初期化（音を防ぐ）
+      previousVotedStatus = data.votedStatus || {}; // 投票状態を初期化
       console.log('✅ セッション変更完了: previousTotalVotes =', previousTotalVotes);
       return; // セッション変更時は音声チェックをスキップ
     }
     
-    // 投票音再生
-    // 投票数が増えたら1回だけ音声を再生
-    console.log('🎯 投票チェック:', { 
-      voteCount: data.voteCount, 
-      previousTotalVotes,
-      shouldPlay: data.voteCount > previousTotalVotes
-    });
+    // 投票音再生（0票対応版）
+    // 新たに投票した審査員がいれば音を鳴らす
+    const currentVotedStatus = data.votedStatus || {};
+    let hasNewVote = false;
     
-    if (data.voteCount > previousTotalVotes) {
+    for (let i = 1; i <= 5; i++) {
+      const wasVoted = previousVotedStatus[i] || false;
+      const isVoted = currentVotedStatus[i] || false;
+      
+      if (!wasVoted && isVoted) {
+        hasNewVote = true;
+        console.log(`🔔 審査員${i}が新規投票`);
+        break;
+      }
+    }
+    
+    if (hasNewVote) {
       console.log('🔔 投票音を再生');
       playAudio(voteAudio);
     }
+    
+    previousVotedStatus = { ...currentVotedStatus };
     previousTotalVotes = data.voteCount;
     
     // 投票数表示更新
