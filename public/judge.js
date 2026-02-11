@@ -11,7 +11,7 @@ let currentSessionId = null;
 // ============================================
 // DOM要素
 // ============================================
-let vote1Btn, vote2Btn, vote3Btn, yoBtn;
+let vote0Btn, vote1Btn, vote2Btn, vote3Btn, yoBtn;
 let currentVoteCountElement, feedback, feedbackText, loadingOverlay;
 
 // ============================================
@@ -56,10 +56,10 @@ function resetVoteState() {
 // ボタン状態更新
 // ============================================
 function updateButtonStates() {
-  if (!vote1Btn || !vote2Btn || !vote3Btn) return;
+  if (!vote0Btn || !vote1Btn || !vote2Btn || !vote3Btn) return;
   
   const shouldDisable = hasVoted || isProcessing;
-  const buttons = [vote1Btn, vote2Btn, vote3Btn];
+  const buttons = [vote0Btn, vote1Btn, vote2Btn, vote3Btn];
   
   buttons.forEach(btn => {
     btn.disabled = shouldDisable;
@@ -172,6 +172,7 @@ function showFeedback(message, type = 'info') {
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
   // DOM要素取得
+  vote0Btn = document.getElementById('vote0Btn');
   vote1Btn = document.getElementById('vote1Btn');
   vote2Btn = document.getElementById('vote2Btn');
   vote3Btn = document.getElementById('vote3Btn');
@@ -182,12 +183,13 @@ document.addEventListener('DOMContentLoaded', function() {
   loadingOverlay = document.getElementById('loadingOverlay');
   
   // 必須要素チェック
-  if (!vote1Btn || !vote2Btn || !vote3Btn || !yoBtn) {
+  if (!vote0Btn || !vote1Btn || !vote2Btn || !vote3Btn || !yoBtn) {
     console.error('必要な要素が見つかりません');
     return;
   }
   
   // イベントリスナー設定
+  vote0Btn.addEventListener('click', () => voteMultiple(0));
   vote1Btn.addEventListener('click', () => voteMultiple(1));
   vote2Btn.addEventListener('click', () => voteMultiple(2));
   vote3Btn.addEventListener('click', () => voteMultiple(3));

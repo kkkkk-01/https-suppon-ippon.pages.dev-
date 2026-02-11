@@ -292,6 +292,10 @@ app.get('/', (c) => {
             background-color: rgba(239, 68, 68, 0.95);
             border-color: #dc2626 !important;
           }
+          .zero-vote-card {
+            background-color: rgba(59, 130, 246, 0.95);
+            border-color: #2563eb !important;
+          }
         </style>
     </head>
     <body class="min-h-screen" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);">
@@ -429,8 +433,11 @@ app.get('/judge/:number', async (c) => {
             <div class="text-sm text-gray-600 mt-1">/ 3票</div>
         </div>
         
-        <div class="grid grid-cols-3 gap-4 w-full max-w-md mb-8">
-            <button id="vote1Btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-8 rounded-xl text-4xl shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 border-4 border-black suppon-font">
+        <div class="grid grid-cols-2 gap-4 w-full max-w-md mb-8">
+            <button id="vote0Btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-8 rounded-xl text-4xl shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 border-4 border-black suppon-font">
+                0
+            </button>
+            <button id="vote1Btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-8 rounded-xl text-4xl shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 border-4 border-black suppon-font">
                 1
             </button>
             <button id="vote2Btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-8 rounded-xl text-4xl shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 border-4 border-black suppon-font">

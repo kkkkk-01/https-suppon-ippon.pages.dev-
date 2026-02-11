@@ -103,30 +103,45 @@ function updateJudgesDisplay(votes) {
 
 // 投票済み審査員の表示
 function updateVotedJudge(statusIcon, votedText, judgeName, judgeCard, voteCount) {
-  // アイコン設定
-  if (voteCount === 1) {
+  // 0票の場合は青色
+  if (voteCount === 0) {
+    statusIcon.textContent = '🔵';
+    votedText.textContent = `0票 / 3票`;
+    votedText.className = 'text-lg font-bold mt-2 text-white';
+    judgeName.className = 'text-2xl font-bold mb-3 text-white';
+    judgeCard.classList.add('zero-vote-card');
+    judgeCard.classList.remove('voted-card', 'bg-white/90', 'border-black');
+  } else if (voteCount === 1) {
     statusIcon.textContent = '🟡';
+    votedText.textContent = `${voteCount}票 / 3票`;
+    votedText.className = 'text-lg font-bold mt-2 text-white';
+    judgeName.className = 'text-2xl font-bold mb-3 text-white';
+    judgeCard.classList.add('voted-card');
+    judgeCard.classList.remove('zero-vote-card', 'bg-white/90', 'border-black');
   } else if (voteCount === 2) {
     statusIcon.textContent = '🟠';
+    votedText.textContent = `${voteCount}票 / 3票`;
+    votedText.className = 'text-lg font-bold mt-2 text-white';
+    judgeName.className = 'text-2xl font-bold mb-3 text-white';
+    judgeCard.classList.add('voted-card');
+    judgeCard.classList.remove('zero-vote-card', 'bg-white/90', 'border-black');
   } else {
     statusIcon.textContent = '🔴';
+    votedText.textContent = `${voteCount}票 / 3票`;
+    votedText.className = 'text-lg font-bold mt-2 text-white';
+    judgeName.className = 'text-2xl font-bold mb-3 text-white';
+    judgeCard.classList.add('voted-card');
+    judgeCard.classList.remove('zero-vote-card', 'bg-white/90', 'border-black');
   }
-  
-  // テキストとスタイル
-  votedText.textContent = `${voteCount}票 / 3票`;
-  votedText.className = 'text-lg font-bold mt-2 text-white';
-  judgeName.className = 'text-2xl font-bold mb-3 text-white';
-  judgeCard.classList.add('voted-card');
-  judgeCard.classList.remove('bg-white/90', 'border-black');
 }
 
 // 未投票審査員の表示
 function updateUnvotedJudge(statusIcon, votedText, judgeName, judgeCard) {
   statusIcon.textContent = '⚪️';
-  votedText.textContent = '0票 / 3票';
+  votedText.textContent = '未投票';
   votedText.className = 'text-lg font-semibold mt-2 text-gray-600';
   judgeName.className = 'text-2xl font-bold mb-3 text-gray-900';
-  judgeCard.classList.remove('voted-card');
+  judgeCard.classList.remove('voted-card', 'zero-vote-card');
   judgeCard.classList.add('bg-white/90', 'border-black');
 }
 
