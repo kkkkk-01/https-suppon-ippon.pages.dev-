@@ -58,7 +58,7 @@ async function updateStatus() {
     }
     
     // 審査員状態更新
-    updateJudgesDisplay(data.votes);
+    updateJudgesDisplay(data.votes, data.votedStatus);
     
     // IPPON表示と音声
     updateIpponDisplay(data.isIppon);
@@ -77,10 +77,13 @@ async function updateStatus() {
 // ============================================
 // 審査員表示更新
 // ============================================
-function updateJudgesDisplay(votes) {
+function updateJudgesDisplay(votes, votedStatus) {
   // votesが無い場合のデフォルト値
   if (!votes) {
     votes = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  }
+  if (!votedStatus) {
+    votedStatus = { 1: false, 2: false, 3: false, 4: false, 5: false };
   }
   
   for (let i = 1; i <= 5; i++) {
@@ -90,9 +93,10 @@ function updateJudgesDisplay(votes) {
     const votedText = document.getElementById(`voted-text-${i}`);
     
     const voteCount = votes[i] || 0;
+    const hasVoted = votedStatus[i] || false;
     
-    if (voteCount > 0) {
-      // 投票済みスタイル
+    if (hasVoted) {
+      // 投票済みスタイル（0票も含む）
       updateVotedJudge(statusIcon, votedText, judgeName, judgeCard, voteCount);
     } else {
       // 未投票スタイル
