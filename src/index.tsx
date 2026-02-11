@@ -181,8 +181,8 @@ app.post('/api/vote', async (c) => {
   const { DB } = c.env
   const { judgeNumber, voteCount = 1 } = await c.req.json()
   
-  // Validate voteCount (1-3)
-  const votesToAdd = Math.min(Math.max(1, voteCount), 3)
+  // Validate voteCount (0-3)
+  const votesToAdd = Math.min(Math.max(0, voteCount), 3)
   
   // Get current active session
   const session = await DB.prepare(`
@@ -212,13 +212,8 @@ app.post('/api/vote', async (c) => {
   
   const currentCount = currentVote?.vote_count || 0
   
-  // Calculate new count (max 3 votes total)
-  const newCount = Math.min(currentCount + votesToAdd, 3)
-  
-  // Check if already at maximum
-  if (currentCount >= 3) {
-    return c.json({ error: 'Maximum 3 votes per judge', voteCount: 3 }, 400)
-  }
+  // Set new count directly (not adding, but setting to voteCount)
+  const newCount = votesToAdd
   
   // Insert or update vote
   await DB.prepare(`
