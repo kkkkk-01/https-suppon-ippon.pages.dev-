@@ -30,7 +30,7 @@ async function updateStatus() {
     // 状態更新
     currentSessionId = data.sessionId;
     currentVoteCount = data.votes[judgeNumber] || 0;
-    hasVoted = currentVoteCount > 0;
+    hasVoted = data.votedStatus ? data.votedStatus[judgeNumber] : false;
     
     // 表示更新
     if (currentVoteCountElement) {

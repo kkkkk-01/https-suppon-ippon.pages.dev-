@@ -71,17 +71,20 @@ app.get('/api/status', async (c) => {
   
   // Get votes for current session
   const votesResult = await DB.prepare(`
-    SELECT judge_id, vote_count FROM votes
+    SELECT judge_id, vote_count, voted FROM votes
     WHERE session_id = ?
   `).bind(session.id).all()
   
   const votes: { [key: number]: number } = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+  const votedStatus: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false }
   let totalVoteCount = 0
   
   for (const vote of votesResult.results) {
     const judgeId = (vote as any).judge_id
     const voteCount = (vote as any).vote_count || 0
+    const voted = (vote as any).voted || 0
     votes[judgeId] = voteCount
+    votedStatus[judgeId] = voted === 1
     totalVoteCount += voteCount
   }
   
@@ -101,6 +104,7 @@ app.get('/api/status', async (c) => {
     voteCount: totalVoteCount,
     maxVotes: 15,
     votes,
+    votedStatus,
     isIppon,
     yo: yoEvent ? {
       hasYo: true,
@@ -223,7 +227,7 @@ app.post('/api/vote', async (c) => {
     DO UPDATE SET vote_count = ?, voted = 1, voted_at = CURRENT_TIMESTAMP
   `).bind(session.id, judge.id, newCount, newCount).run()
   
-  return c.json({ success: true, voteCount: newCount })
+  return c.json({ success: true, voteCount: newCount, voted: true })
 })
 
 // API: YO event (from smartphone)
